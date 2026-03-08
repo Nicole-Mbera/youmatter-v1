@@ -1,0 +1,207 @@
+-- You Matter Therapy Platform - Database Schema
+-- Clean schema optimized for patient-therapist matching and session management
+
+-- Users table (base table for all user types)
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('patient', 'therapist', 'admin')),
+    is_verified BOOLEAN DEFAULT 0,
+    is_active BOOLEAN DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Patients table
+CREATE TABLE IF NOT EXISTS patients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER UNIQUE NOT NULL,
+    username TEXT UNIQUE NOT NULL,
+    full_name TEXT NOT NULL,
+    date_of_birth DATE,
+    gender TEXT CHECK(gender IN ('male', 'female', 'other', 'prefer_not_to_say')),
+    phone TEXT,
+    profile_picture TEXT,
+    bio TEXT,
+    english_proficiency TEXT CHECK(english_proficiency IN ('beginner', 'intermediate', 'advanced', 'fluent')),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Therapists table
+CREATE TABLE IF NOT EXISTS therapists (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER UNIQUE NOT NULL,
+    full_name TEXT NOT NULL,
+    specialization TEXT,
+    years_of_experience INTEGER,
+    bio TEXT,
+    license_number TEXT UNIQUE,
+    phone TEXT,
+    country TEXT,
+    institution_name TEXT,
+    mission TEXT,
+    profile_picture TEXT,
+    consultation_fee REAL DEFAULT 80.0,
+    average_rating REAL DEFAULT 0.0,
+    total_reviews INTEGER DEFAULT 0,
+    is_verified BOOLEAN DEFAULT 0,
+    verification_status TEXT CHECK(verification_status IN ('pending', 'approved', 'rejected')) DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Therapist documents (license, certs, etc)
+CREATE TABLE IF NOT EXISTS therapist_documents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    therapist_id INTEGER NOT NULL,
+    document_type TEXT NOT NULL CHECK(document_type IN ('government_id', 'professional_license', 'graduate_degree', 'liability_insurance')),
+    document_url TEXT NOT NULL,
+    verified BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (therapist_id) REFERENCES therapists(id) ON DELETE CASCADE
+);
+
+-- Availability schedules for therapists
+CREATE TABLE IF NOT EXISTS availability_schedules (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    therapist_id INTEGER NOT NULL,
+    day_of_week INTEGER NOT NULL CHECK(day_of_week BETWEEN 0 AND 6),
+    start_time TEXT NOT NULL,
+    end_time TEXT NOT NULL,
+    is_available BOOLEAN DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (therapist_id) REFERENCES therapists(id) ON DELETE CASCADE
+);
+
+-- Sessions/Consultations
+CREATE TABLE IF NOT EXISTS sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    patient_id INTEGER NOT NULL,
+    therapist_id INTEGER NOT NULL,
+    scheduled_date DATE NOT NULL,
+    scheduled_time TEXT NOT NULL,
+    duration_minutes INTEGER DEFAULT 60,
+    session_type TEXT CHECK(session_type IN ('video', 'chat', 'phone')),
+    status TEXT CHECK(status IN ('scheduled', 'completed', 'cancelled', 'no_show')) DEFAULT 'scheduled',
+    notes TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (therapist_id) REFERENCES therapists(id) ON DELETE CASCADE
+);
+
+-- Session reviews and ratings
+CREATE TABLE IF NOT EXISTS session_reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER NOT NULL,
+    patient_id INTEGER NOT NULL,
+    therapist_id INTEGER NOT NULL,
+    rating INTEGER CHECK(rating BETWEEN 1 AND 5),
+    review_text TEXT,
+    is_anonymous BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (therapist_id) REFERENCES therapists(id) ON DELETE CASCADE
+);
+
+-- Payments
+CREATE TABLE IF NOT EXISTS payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER,
+    patient_id INTEGER NOT NULL,
+    therapist_id INTEGER NOT NULL,
+    amount REAL NOT NULL,
+    currency TEXT DEFAULT 'USD',
+    payment_method TEXT,
+    stripe_payment_id TEXT,
+    status TEXT CHECK(status IN ('pending', 'completed', 'failed', 'refunded')) DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE SET NULL,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (therapist_id) REFERENCES therapists(id) ON DELETE CASCADE
+);
+
+-- Education resources
+CREATE TABLE IF NOT EXISTS education_resources (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT,
+    category TEXT,
+    content TEXT,
+    image_url TEXT,
+    author TEXT,
+    tags TEXT,
+    is_featured BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Testimonials
+CREATE TABLE IF NOT EXISTS testimonials (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    patient_id INTEGER,
+    therapist_id INTEGER,
+    testimonial_text TEXT NOT NULL,
+    rating INTEGER CHECK(rating BETWEEN 1 AND 5),
+    is_featured BOOLEAN DEFAULT 0,
+    is_approved BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE SET NULL,
+    FOREIGN KEY (therapist_id) REFERENCES therapists(id) ON DELETE SET NULL
+);
+
+-- Bookmarks (patients saving therapist profiles)
+CREATE TABLE IF NOT EXISTS bookmarks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    patient_id INTEGER NOT NULL,
+    therapist_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(patient_id, therapist_id),
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (therapist_id) REFERENCES therapists(id) ON DELETE CASCADE
+);
+
+-- Password reset tokens
+CREATE TABLE IF NOT EXISTS password_resets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    token TEXT UNIQUE NOT NULL,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Donations
+CREATE TABLE IF NOT EXISTS donations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    donor_email TEXT,
+    amount REAL NOT NULL,
+    currency TEXT DEFAULT 'USD',
+    message TEXT,
+    stripe_donation_id TEXT,
+    status TEXT CHECK(status IN ('pending', 'completed', 'failed')) DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for better query performance
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_patients_user_id ON patients(user_id);
+CREATE INDEX idx_patients_username ON patients(username);
+CREATE INDEX idx_therapists_user_id ON therapists(user_id);
+CREATE INDEX idx_therapists_status ON therapists(verification_status);
+CREATE INDEX idx_sessions_patient ON sessions(patient_id);
+CREATE INDEX idx_sessions_therapist ON sessions(therapist_id);
+CREATE INDEX idx_sessions_status ON sessions(status);
+CREATE INDEX idx_sessions_date ON sessions(scheduled_date);
+CREATE INDEX idx_payments_status ON payments(status);
+CREATE INDEX idx_reviews_therapist ON session_reviews(therapist_id);
+CREATE INDEX idx_bookmarks_patient ON bookmarks(patient_id);
