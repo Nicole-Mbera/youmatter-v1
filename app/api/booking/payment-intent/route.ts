@@ -14,10 +14,10 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json();
-        const { teacherId } = body;
+        const id = body.therapistId || body.therapist_id;
 
-        if (!teacherId) {
-            return NextResponse.json({ error: "Teacher ID is required" }, { status: 400 });
+        if (!id) {
+            return NextResponse.json({ error: "Therapist ID is required" }, { status: 400 });
         }
 
         if (!stripe) {
@@ -25,21 +25,21 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Payment service unavailable" }, { status: 503 });
         }
 
-        // Fetch teacher details
-        const teacherResult = await client.execute({
-            sql: "SELECT * FROM teachers WHERE id = ?",
-            args: [teacherId],
+        // Fetch therapist details
+        const therapistResult = await client.execute({
+            sql: "SELECT * FROM therapists WHERE id = ?",
+            args: [id],
         });
 
-        const teacher = teacherResult.rows[0] as any;
+        const therapist = therapistResult.rows[0] as any;
 
-        if (!teacher) {
-            return NextResponse.json({ error: "Teacher not found" }, { status: 404 });
+        if (!therapist) {
+            return NextResponse.json({ error: "Therapist not found" }, { status: 404 });
         }
 
-        // Calculate amount and fee
-        // Default to $60.00 (6000 cents) if not set
-        const amount = teacher.monthly_fee || 6000;
+        // Calculate amount and fee (consultation_fee in dollars, convert to cents)
+        const feeDollars = therapist.consultation_fee || 80;
+        const amount = Math.round(feeDollars * 100); // Convert to cents
 
         // Platform fee calculation (e.g., 30%)
         const platformFeePercent = 0.3;
@@ -49,19 +49,19 @@ export async function POST(request: Request) {
             amount: amount,
             currency: "usd",
             metadata: {
-                teacher_id: teacherId.toString(),
-                student_user_id: user.userId.toString(),
-                purpose: "monthly_subscription",
+                therapist_id: id.toString(),
+                patient_user_id: user.userId.toString(),
+                purpose: "session_booking",
             },
             automatic_payment_methods: {
                 enabled: true,
             },
         };
 
-        // If teacher has a connected Stripe account, route the funds
-        if (teacher.stripe_account_id) {
+        // If therapist has a connected Stripe account, route the funds
+        if (therapist.stripe_account_id) {
             paymentIntentConfig.transfer_data = {
-                destination: teacher.stripe_account_id,
+                destination: therapist.stripe_account_id,
             };
             paymentIntentConfig.application_fee_amount = applicationFeeAmount;
         }

@@ -108,13 +108,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('User role:', data.user.role);
 
-      // redirect based on role (updated for new role structure)
       const redirectMap = {
         'admin': '/admin',
-        'teacher': '/teacher',
-        'student': '/student',
         'therapist': '/clinician',
-        'clinician': '/clinician',
         'patient': '/patient',
       };
 

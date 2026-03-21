@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { DashboardShell } from '@/components/dashboard/dashboard-shell';
+import { useAuth } from '@/lib/auth-context';
+import { AuthModal } from '@/components/auth/auth-modal';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, AlertCircle, ChevronLeft } from 'lucide-react';
+import { BookingPaymentModal } from '@/components/booking/booking-payment-modal';
+import Link from 'next/link';
 
 interface AvailableSlot {
   date: string;
@@ -12,7 +15,7 @@ interface AvailableSlot {
   available: boolean;
 }
 
-interface Clinician {
+interface therapist {
   id: number;
   full_name: string;
   specialization?: string;
@@ -24,43 +27,52 @@ interface Clinician {
 export default function BookSessionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const clinicianId = searchParams.get('clinician_id');
+  const therapistId = searchParams.get('therapist_id');
+  const { user, isLoading: authLoading } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  const [clinician, setClinician] = useState<Clinician | null>(null);
+  const [therapist, settherapist] = useState<therapist | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
-  const [sessionType, setSessionType] = useState<'individual' | 'couple' | 'family'>('individual');
+  const [sessionType, setSessionType] = useState<'video' | 'chat' | 'phone'>('video');
   const [notes, setNotes] = useState('');
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
-    if (clinicianId) {
-      fetchClinicianInfo();
+    if (!authLoading && !user) {
+      setAuthModalOpen(true);
+    }
+  }, [authLoading, user]);
+
+  useEffect(() => {
+    if (therapistId) {
+      fetchtherapistInfo();
       fetchAvailableSlots();
     } else {
-      setError('No clinician selected');
+      setError('No therapist selected');
       setLoading(false);
     }
-  }, [clinicianId]);
+  }, [therapistId]);
 
-  const fetchClinicianInfo = async () => {
+  const fetchtherapistInfo = async () => {
     try {
-      const response = await fetch(`/api/patient/clinician/${clinicianId}`);
-      if (!response.ok) throw new Error('Failed to load clinician info');
+      const response = await fetch(`/api/patient/clinician/${therapistId}`);
+      if (!response.ok) throw new Error('Failed to load therapist info');
       const data = await response.json();
-      setClinician(data.data);
+      settherapist(data.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load clinician');
+      setError(err instanceof Error ? err.message : 'Failed to load therapist');
     }
   };
 
   const fetchAvailableSlots = async () => {
     try {
-      const response = await fetch(`/api/patient/clinician/${clinicianId}/availability`);
+      const response = await fetch(`/api/patient/clinician/${therapistId}/availability`);
       if (!response.ok) throw new Error('Failed to load availability');
       const data = await response.json();
       setAvailableSlots(data.data || []);
@@ -71,7 +83,7 @@ export default function BookSessionContent() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -80,18 +92,26 @@ export default function BookSessionContent() {
       return;
     }
 
+    // Open payment modal — session is only created after successful payment
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    setShowPaymentModal(false);
     setSubmitting(true);
+    setError(null);
     try {
       const response = await fetch('/api/patient/sessions/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          clinician_id: clinicianId,
+          therapist_id: therapistId,
           scheduled_date: selectedDate,
           scheduled_time: selectedTime,
           session_type: sessionType,
           notes,
+          payment_intent_id: paymentIntentId,
         }),
       });
 
@@ -100,12 +120,7 @@ export default function BookSessionContent() {
         throw new Error(errorData.error || 'Failed to book session');
       }
 
-      const result = await response.json();
-      
-      // Redirect to confirmation or sessions page
-      setTimeout(() => {
-        router.push('/patient/sessions?booked=true');
-      }, 1500);
+      router.push('/patient/sessions?booked=true');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to book session');
     } finally {
@@ -113,44 +128,28 @@ export default function BookSessionContent() {
     }
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
-      <DashboardShell
-        title="Book a Session"
-        subtitle="Schedule your therapy session"
-        breadcrumbs={[
-          { label: 'Patient', href: '/patient' },
-          { label: 'Find Therapist', href: '/patient/find-therapist' },
-          { label: 'Book Session' },
-        ]}
-        navItems={[]}
-      >
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-black border-t-transparent"></div>
+      <div className="min-h-screen bg-gray-50">
+        <PageHeader therapistName={null} />
+        <div className="flex items-center justify-center py-24">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-green-600 border-t-transparent" />
         </div>
-      </DashboardShell>
+        <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} preSelectedRole="patient" />
+      </div>
     );
   }
 
-  if (!clinician) {
+  if (!therapist) {
     return (
-      <DashboardShell
-        title="Book a Session"
-        subtitle="Schedule your therapy session"
-        breadcrumbs={[
-          { label: 'Patient', href: '/patient' },
-          { label: 'Find Therapist', href: '/patient/find-therapist' },
-          { label: 'Book Session' },
-        ]}
-        navItems={[]}
-      >
-        <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-center">
-          <p className="text-red-600">{error || 'Clinician not found'}</p>
-          <Button onClick={() => router.back()} className="mt-4">
-            Go Back
-          </Button>
+      <div className="min-h-screen bg-gray-50">
+        <PageHeader therapistName={null} />
+        <div className="max-w-4xl mx-auto px-6 py-16 text-center">
+          <p className="text-red-600 mb-4">{error || 'Therapist not found'}</p>
+          <Button onClick={() => router.back()}>Go Back</Button>
         </div>
-      </DashboardShell>
+        <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} preSelectedRole="patient" />
+      </div>
     );
   }
 
@@ -170,17 +169,10 @@ export default function BookSessionContent() {
   const availableDates = Array.from(new Set(availableSlots.map((s) => s.date))).sort();
 
   return (
-    <DashboardShell
-      title="Book a Session"
-      subtitle={`Schedule with ${clinician.full_name}`}
-      breadcrumbs={[
-        { label: 'Patient', href: '/patient' },
-        { label: 'Find Therapist', href: '/patient/find-therapist' },
-        { label: 'Book Session' },
-      ]}
-      navItems={[]}
-    >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-4xl">
+    <div className="min-h-screen bg-gray-50">
+      <PageHeader therapistName={therapist.full_name} />
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Form */}
         <div className="lg:col-span-2 space-y-6">
           {error && (
@@ -197,17 +189,21 @@ export default function BookSessionContent() {
                 Session Type
               </label>
               <div className="space-y-2">
-                {(['individual', 'couple', 'family'] as const).map((type) => (
-                  <label key={type} className="flex items-center gap-3 p-3 rounded-2xl border border-gray-200 cursor-pointer hover:bg-gray-50">
+                {([
+                  { value: 'video', label: 'Video Session' },
+                  { value: 'chat', label: 'Chat / Messaging' },
+                  { value: 'phone', label: 'Phone Call' },
+                ] as const).map(({ value, label }) => (
+                  <label key={value} className="flex items-center gap-3 p-3 rounded-2xl border border-gray-200 cursor-pointer hover:bg-gray-50">
                     <input
                       type="radio"
                       name="session_type"
-                      value={type}
-                      checked={sessionType === type}
-                      onChange={() => setSessionType(type)}
+                      value={value}
+                      checked={sessionType === value}
+                      onChange={() => setSessionType(value)}
                       className="w-4 h-4"
                     />
-                    <span className="text-sm text-black capitalize">{type} Session</span>
+                    <span className="text-sm text-black">{label}</span>
                   </label>
                 ))}
               </div>
@@ -220,7 +216,7 @@ export default function BookSessionContent() {
                 Select Date *
               </label>
               {availableDates.length === 0 ? (
-                <p className="text-gray-600 text-sm">No available dates. Please contact the clinician.</p>
+                <p className="text-gray-600 text-sm">This therapist has not set their availability yet. Please check back later or contact them directly.</p>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   {availableDates.map((date) => (
@@ -300,20 +296,20 @@ export default function BookSessionContent() {
         </div>
 
         {/* Sidebar - Summary */}
-        <div className="rounded-3xl border border-gray-200 bg-white p-6 h-fit sticky top-6">
+        <div className="rounded-3xl border border-gray-200 bg-white p-6 h-fit sticky top-24">
           <h3 className="text-lg font-semibold text-black mb-4">Booking Summary</h3>
 
           <div className="space-y-4 border-b border-gray-200 pb-4">
             <div>
               <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Therapist</p>
-              <p className="font-medium text-black">{clinician.full_name}</p>
+              <p className="font-medium text-black">{therapist.full_name}</p>
             </div>
 
-            {(clinician.specialization || (clinician.specializations && clinician.specializations.length > 0)) && (
+            {(therapist.specialization || (therapist.specializations && therapist.specializations.length > 0)) && (
               <div>
                 <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Specialization</p>
                 <p className="text-sm text-gray-700">
-                  {clinician.specialization || (clinician.specializations?.slice(0, 2).join(', '))}
+                  {therapist.specialization || (therapist.specializations?.slice(0, 2).join(', '))}
                 </p>
               </div>
             )}
@@ -342,18 +338,53 @@ export default function BookSessionContent() {
 
             <div>
               <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Session Type</p>
-              <p className="font-medium text-black capitalize">{sessionType}</p>
+              <p className="font-medium text-black">
+                {sessionType === 'video' ? 'Video Session' : sessionType === 'chat' ? 'Chat / Messaging' : 'Phone Call'}
+              </p>
             </div>
           </div>
 
           <div className="pt-4">
             <p className="text-xs text-gray-500 uppercase font-semibold mb-2">Total Price</p>
             <p className="text-2xl font-bold text-black">
-              {formatPrice(clinician.consultation_fee, clinician.session_price)}
+              {formatPrice(therapist.consultation_fee, therapist.session_price)}
             </p>
           </div>
         </div>
       </div>
-    </DashboardShell>
+
+      {therapist && (
+        <BookingPaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          amount={(therapist.consultation_fee || therapist.session_price || 80) * 100}
+          therapistName={therapist.full_name}
+          therapistId={therapist.id}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
+      </div>
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} preSelectedRole="patient" />
+    </div>
+  );
+}
+
+function PageHeader({ therapistName }: { therapistName: string | null }) {
+  return (
+    <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+      <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+        <Link href={therapistName ? '/patient/find-therapist' : '/'}>
+          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <ChevronLeft className="w-5 h-5 text-gray-600" />
+          </button>
+        </Link>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Book a Session</h1>
+          {therapistName && (
+            <p className="text-sm text-gray-500">Schedule with {therapistName}</p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

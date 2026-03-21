@@ -4,7 +4,7 @@
 export const swaggerDefinition = {
   openapi: '3.0.0',
   info: {
-    title: 'AEON API',
+    title: 'youmatter API',
     version: '1.0.0',
     description: 'You Matter Therapy Platform API',
   },

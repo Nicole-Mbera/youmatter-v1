@@ -24,20 +24,17 @@ export async function POST(request: Request) {
             );
         }
 
-        // Map DB roles to UI roles (consistency with auth.ts)
-        const roleMap: Record<string, 'student' | 'teacher' | 'admin'> = {
-            'student': 'student',
-            'teacher': 'teacher',
-            'admin': 'admin',
-        };
-        const mappedRole = roleMap[user.role] || 'student';
+        const role = (user.role === 'patient' || user.role === 'therapist' || user.role === 'admin')
+            ? user.role
+            : 'patient';
 
         // Generate new token with updated subscription status
         const token = generateToken({
             userId: user.id,
             email: user.email,
-            role: mappedRole,
+            role,
             subscription_status: user.subscription_status,
+            is_verified: user.is_verified,
         });
 
         // Create response
@@ -47,7 +44,7 @@ export async function POST(request: Request) {
             user: {
                 id: user.id,
                 email: user.email,
-                role: mappedRole,
+                role,
                 isVerified: user.is_verified,
                 subscription_status: user.subscription_status,
             },

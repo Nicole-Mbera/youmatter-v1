@@ -42,7 +42,20 @@ export async function POST(request: Request) {
         });
 
         // Send email
-        await sendPasswordResetEmail(email, token);
+        const emailResult = await sendPasswordResetEmail(email, token);
+
+        if (!emailResult.success) {
+            // Clean up the token we just inserted so the user can try again
+            await db.execute({
+                sql: 'DELETE FROM password_resets WHERE token = ?',
+                args: [token]
+            });
+            console.error('Password reset email failed to send:', emailResult.error);
+            return NextResponse.json(
+                { error: 'Failed to send reset email. Please try again later.' },
+                { status: 500 }
+            );
+        }
 
         return NextResponse.json({
             success: true,

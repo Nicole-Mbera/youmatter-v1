@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { hashPassword, generateToken } from '@/lib/auth';
-import { userQueries, patientQueries, professionalQueries, institutionalAdminQueries } from '@/lib/db';
+import { userQueries, patientQueries, therapistQueries } from '@/lib/db';
 import db from '@/lib/db';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 import { validateRequest, registerSchema } from '@/lib/validation';
+
+const DOCUMENT_TYPE_MAP = ['government_id', 'professional_license', 'graduate_degree', 'liability_insurance'] as const;
 
 export async function POST(request: Request) {
   try {
@@ -42,13 +44,10 @@ export async function POST(request: Request) {
     }
 
     const body = validation.data;
-    const { email, password, role } = body; // role is 'student' | 'teacher'
+    const { email, password, role } = body;
 
-    // Use education roles directly in database
-    const dbRole = role; // 'student' | 'teacher'
-
-    // Check username availability for students
-    if (role === 'student' && body.username) {
+    // Check username availability for patients
+    if (role === 'patient' && body.username) {
       const existingUsername = await patientQueries.checkUsernameAvailable(body.username);
       if (existingUsername) {
         return NextResponse.json(
@@ -70,13 +69,10 @@ export async function POST(request: Request) {
     // Hash password
     const passwordHash = await hashPassword(password);
 
-    // Create user and role-specific profile manually (LibSQL/HTTP stateless doesn't support interactive transactions easily without interactive transactions mode, so we'll do sequential for now or use batch if needed)
-    // For now, robust sequential operations. If user creation fails, we stop. If profile creation fails, we have an orphan user (can be cleaned up or use batch)
+    // Pre-validate therapist payload
+    let therapistPayload: { full_name: string; specialization?: string; years_of_experience?: number; bio?: string; phone?: string; license_number?: string; institution_name?: string; country?: string; contact_email?: string; mission?: string; documents?: string[] } | null = null;
 
-    // 0. Pre-validate and Upload for Teacher (to avoid orphan users if upload fails)
-    let teacherPayload: any = null;
-
-    if (role === 'teacher') {
+    if (role === 'therapist') {
       const {
         full_name,
         specialization,
@@ -91,31 +87,7 @@ export async function POST(request: Request) {
         documents
       } = body;
 
-      // Validate required fields can be done here or relied on Zod
-      // But documents upload needs to happen here or we need to roll back usage
-
-      // Since we can't easily upload files here (we just get URLs or metadata from client if client uploaded, 
-      // BUT looking at the previous code, CLIENT didn't upload, the SERVER endpoint 'POST' was doing the upload?
-      // Wait, the client sends 'documents' as an array of STRINGS (URLs)? 
-      // Let's check the schema. registerTeacherSchema says documents: z.array(z.string()).optional()
-      // So the Frontend uploads the files, gets URLs, and sends URLs to this endpoint.
-
-      // IF the frontend sends URLs, then "Upload" succeeded.
-      // So why would createProfessional fail?
-      // Maybe Zod validation passed, but DB insert failed? 
-
-      // Ah, checking the PREVIOUS code in `signup-form.tsx`:
-      // The FRONTEND does the upload loop:
-      //   const uploadRes = await fetch('/api/upload'...)
-      // And THEN sends `payload.documents = uploadedUrls` to `/api/auth/register`.
-
-      // So `register/route.ts` receives URLs.
-
-      // Wait, if `register/route.ts` receives URLs, then the file upload is already done.
-      // So where is the failure? 
-      // "documents ? JSON.stringify(documents) : null"
-
-      teacherPayload = {
+      therapistPayload = {
         full_name,
         specialization,
         years_of_experience,
@@ -134,22 +106,21 @@ export async function POST(request: Request) {
     const userResult = await userQueries.createUser(
       email,
       passwordHash,
-      dbRole,
-      role === 'student' ? 1 : 0, // auto-verify students
+      role,
+      role === 'patient' ? 1 : 0, // auto-verify patients
       1 // is_active
     );
 
-    // Get the inserted ID.
     let userId = userResult.lastInsertRowid ? Number(userResult.lastInsertRowid) : 0;
 
     if (!userId) {
       const u = await userQueries.getUserByEmail(email);
       if (!u) throw new Error("Failed to retrieve created user");
-      userId = Number(u.id);
+      userId = Number((u as any).id);
     }
 
     // 2. Create Role Specific Profile
-    if (role === 'student') {
+    if (role === 'patient') {
       const { username, full_name, date_of_birth, gender, phone } = body;
       await patientQueries.createPatient(
         userId,
@@ -160,43 +131,57 @@ export async function POST(request: Request) {
         phone || null,
         null
       );
-    } else if (role === 'teacher' && teacherPayload) {
-      await professionalQueries.createProfessional(
+    } else if (role === 'therapist' && therapistPayload) {
+      await therapistQueries.createTherapist(
         userId,
-        teacherPayload.full_name,
-        teacherPayload.bio || null,
-        teacherPayload.specialization,
-        teacherPayload.years_of_experience || 0,
-        teacherPayload.phone || null,
+        therapistPayload.full_name,
+        therapistPayload.bio || null,
+        therapistPayload.specialization || null,
+        therapistPayload.years_of_experience ?? 0,
+        therapistPayload.phone || null,
         null,
-        teacherPayload.license_number || null,
-        teacherPayload.institution_name || null,
-        teacherPayload.country || null,
-        teacherPayload.contact_email || null,
-        teacherPayload.mission || null,
-        teacherPayload.documents ? JSON.stringify(teacherPayload.documents) : null
+        therapistPayload.license_number || null,
+        therapistPayload.institution_name || null,
+        therapistPayload.country || null,
+        therapistPayload.contact_email || null,
+        therapistPayload.mission || null
       );
+
+      // Insert therapist documents (get therapist id by user_id)
+      const therapist = await therapistQueries.getTherapistByUserId(userId) as any;
+      const therapistId = therapist?.id;
+      if (therapistId && therapistPayload.documents && therapistPayload.documents.length > 0) {
+        for (let i = 0; i < Math.min(therapistPayload.documents.length, DOCUMENT_TYPE_MAP.length); i++) {
+          const docUrl = therapistPayload.documents[i];
+          const docType = DOCUMENT_TYPE_MAP[i];
+          await db.execute({
+            sql: `INSERT INTO therapist_documents (therapist_id, document_type, document_url, verified)
+                  VALUES (?, ?, ?, ?)`,
+            args: [therapistId, docType, docUrl, 0]
+          });
+        }
+      }
     }
 
     // generating token for all users
     const token = generateToken({
-      userId: userId,
-      email: email,
-      role: role, // expose education role in token
-      is_verified: role === 'student' ? 1 : 0,
+      userId,
+      email,
+      role,
+      is_verified: role === 'patient' ? 1 : 0,
     });
 
     const response = NextResponse.json({
       success: true,
-      message: role === 'student'
+      message: role === 'patient'
         ? 'Account created successfully'
         : 'Account created. Pending verification.',
       token,
       user: {
         id: userId,
-        email: email,
-        role: role,
-        isVerified: role === 'student' ? 1 : 0,
+        email,
+        role,
+        isVerified: role === 'patient' ? 1 : 0,
       },
     }, { status: 201 });
 

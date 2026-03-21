@@ -1,5 +1,5 @@
 /**
- * Swagger Annotations for AEON API
+ * Swagger Annotations for youmatter API
  * Separate file to keep API documentation clean and maintainable
  */
 
@@ -23,7 +23,7 @@
  *               email:
  *                 type: string
  *                 format: email
- *                 example: student@aeon.com
+ *                 example: patient@youmatter.com
  *               password:
  *                 type: string
  *                 format: password
@@ -60,7 +60,7 @@
  *   post:
  *     tags: [Authentication]
  *     summary: User registration
- *     description: Register a new student or teacher account
+ *     description: Register a new patient or therapist account
  *     requestBody:
  *       required: true
  *       content:
@@ -82,7 +82,7 @@
  *                     minLength: 8
  *                   role:
  *                     type: string
- *                     enum: [student]
+ *                     enum: [patient]
  *                   username:
  *                     type: string
  *                     minLength: 3
@@ -107,7 +107,7 @@
  *                     minLength: 8
  *                   role:
  *                     type: string
- *                     enum: [teacher]
+ *                     enum: [therapist]
  *                   full_name:
  *                     type: string
  *                   specialization:
@@ -129,11 +129,11 @@
 
 /**
  * @swagger
- * /api/student/lessons:
+ * /api/patient/lessons:
  *   post:
  *     tags: [Lessons]
  *     summary: Book a lesson
- *     description: Book a one-on-one lesson with a teacher
+ *     description: Book a one-on-one lesson with a therapist
  *     security:
  *       - cookieAuth: []
  *       - bearerAuth: []
@@ -144,11 +144,11 @@
  *           schema:
  *             type: object
  *             required:
- *               - teacher_id
+ *               - therapist_id
  *               - scheduled_date
  *               - scheduled_time
  *             properties:
- *               teacher_id:
+ *               therapist_id:
  *                 type: integer
  *               scheduled_date:
  *                 type: string
@@ -174,9 +174,9 @@
  *       429:
  *         description: Too many booking attempts
  *   get:
- *     tags: [Lessons, Students]
- *     summary: Get student's lessons
- *     description: Retrieve all lessons for the current student
+ *     tags: [Lessons, patients]
+ *     summary: Get patient's lessons
+ *     description: Retrieve all lessons for the current patient
  *     security:
  *       - cookieAuth: []
  *       - bearerAuth: []
@@ -194,7 +194,7 @@
  *           default: 1
  *     responses:
  *       200:
- *         description: List of student's lessons
+ *         description: List of patient's lessons
  *         content:
  *           application/json:
  *             schema:
@@ -261,11 +261,11 @@
 
 /**
  * @swagger
- * /api/teachers:
+ * /api/therapists:
  *   get:
- *     tags: [Teachers]
- *     summary: Get all verified teachers
- *     description: Retrieve list of verified teachers with filters
+ *     tags: [therapists]
+ *     summary: Get all verified therapists
+ *     description: Retrieve list of verified therapists with filters
  *     parameters:
  *       - in: query
  *         name: specialization
@@ -284,7 +284,7 @@
  *           default: 1
  *     responses:
  *       200:
- *         description: List of teachers
+ *         description: List of therapists
  *         content:
  *           application/json:
  *             schema:
@@ -295,32 +295,32 @@
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Teacher'
+ *                     $ref: '#/components/schemas/therapist'
  */
 
 /**
  * @swagger
- * /api/student/profile:
+ * /api/patient/profile:
  *   get:
- *     tags: [Students]
- *     summary: Get student profile
- *     description: Retrieve current student's profile information
+ *     tags: [patients]
+ *     summary: Get patient profile
+ *     description: Retrieve current patient's profile information
  *     security:
  *       - cookieAuth: []
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Student profile
+ *         description: patient profile
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Student'
+ *               $ref: '#/components/schemas/patient'
  *       403:
- *         description: Unauthorized or not a student
+ *         description: Unauthorized or not a patient
  *   put:
- *     tags: [Students]
- *     summary: Update student profile
- *     description: Update current student's profile information
+ *     tags: [patients]
+ *     summary: Update patient profile
+ *     description: Update current patient's profile information
  *     security:
  *       - cookieAuth: []
  *       - bearerAuth: []
@@ -353,27 +353,27 @@
 
 /**
  * @swagger
- * /api/teacher/profile:
+ * /api/therapist/profile:
  *   get:
- *     tags: [Teachers]
- *     summary: Get teacher profile
- *     description: Retrieve current teacher's profile information
+ *     tags: [therapists]
+ *     summary: Get therapist profile
+ *     description: Retrieve current therapist's profile information
  *     security:
  *       - cookieAuth: []
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Teacher profile
+ *         description: therapist profile
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Teacher'
+ *               $ref: '#/components/schemas/therapist'
  *       403:
- *         description: Unauthorized or not a teacher
+ *         description: Unauthorized or not a therapist
  *   put:
- *     tags: [Teachers]
- *     summary: Update teacher profile
- *     description: Update current teacher's profile information
+ *     tags: [therapists]
+ *     summary: Update therapist profile
+ *     description: Update current therapist's profile information
  *     security:
  *       - cookieAuth: []
  *       - bearerAuth: []
@@ -405,11 +405,11 @@
 
 /**
  * @swagger
- * /api/teacher/lessons:
+ * /api/therapist/lessons:
  *   get:
- *     tags: [Lessons, Teachers]
- *     summary: Get teacher's lessons
- *     description: Retrieve all lessons for the current teacher
+ *     tags: [Lessons, therapists]
+ *     summary: Get therapist's lessons
+ *     description: Retrieve all lessons for the current therapist
  *     security:
  *       - cookieAuth: []
  *       - bearerAuth: []
@@ -426,7 +426,7 @@
  *           format: date
  *     responses:
  *       200:
- *         description: List of teacher's lessons
+ *         description: List of therapist's lessons
  *         content:
  *           application/json:
  *             schema:
@@ -444,11 +444,11 @@
 
 /**
  * @swagger
- * /api/teacher/availability:
+ * /api/therapist/availability:
  *   get:
- *     tags: [Teachers]
- *     summary: Get teacher availability
- *     description: Retrieve teacher's available time slots
+ *     tags: [therapists]
+ *     summary: Get therapist availability
+ *     description: Retrieve therapist's available time slots
  *     security:
  *       - cookieAuth: []
  *       - bearerAuth: []
@@ -465,13 +465,13 @@
  *           format: date
  *     responses:
  *       200:
- *         description: Teacher availability slots
+ *         description: therapist availability slots
  *       403:
  *         description: Unauthorized
  *   post:
- *     tags: [Teachers]
- *     summary: Set teacher availability
- *     description: Set or update teacher's available time slots
+ *     tags: [therapists]
+ *     summary: Set therapist availability
+ *     description: Set or update therapist's available time slots
  *     security:
  *       - cookieAuth: []
  *       - bearerAuth: []
@@ -505,8 +505,8 @@
  * /api/reviews:
  *   post:
  *     tags: [Reviews]
- *     summary: Submit teacher review
- *     description: Submit a review and rating for a teacher after lesson
+ *     summary: Submit therapist review
+ *     description: Submit a review and rating for a therapist after lesson
  *     security:
  *       - cookieAuth: []
  *       - bearerAuth: []
@@ -517,11 +517,11 @@
  *           schema:
  *             type: object
  *             required:
- *               - teacher_id
+ *               - therapist_id
  *               - lesson_id
  *               - rating
  *             properties:
- *               teacher_id:
+ *               therapist_id:
  *                 type: integer
  *               lesson_id:
  *                 type: integer
@@ -557,7 +557,7 @@
  *         name: role
  *         schema:
  *           type: string
- *           enum: [student, teacher, admin]
+ *           enum: [patient, therapist, admin]
  *       - in: query
  *         name: is_verified
  *         schema:
@@ -593,9 +593,9 @@
  *               properties:
  *                 total_users:
  *                   type: integer
- *                 total_students:
+ *                 total_patients:
  *                   type: integer
- *                 total_teachers:
+ *                 total_therapists:
  *                   type: integer
  *                 total_lessons:
  *                   type: integer

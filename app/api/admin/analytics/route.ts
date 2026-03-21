@@ -21,15 +21,15 @@ export async function GET(request: Request) {
     const period = searchParams.get('period') || '30'; // days
 
     // Get user counts by role
-    const [studentsCountRes, teachersCountRes, adminsCountRes] = await Promise.all([
-      db.execute({ sql: "SELECT COUNT(*) as count FROM users WHERE role = 'student'", args: [] }),
-      db.execute({ sql: "SELECT COUNT(*) as count FROM users WHERE role = 'teacher'", args: [] }),
+    const [patientsCountRes, therapistsCountRes, adminsCountRes] = await Promise.all([
+      db.execute({ sql: "SELECT COUNT(*) as count FROM users WHERE role = 'patient'", args: [] }),
+      db.execute({ sql: "SELECT COUNT(*) as count FROM users WHERE role = 'therapist'", args: [] }),
       db.execute({ sql: "SELECT COUNT(*) as count FROM users WHERE role = 'admin'", args: [] })
     ]);
 
     const userCounts = {
-      students: (studentsCountRes.rows[0] as any).count,
-      teachers: (teachersCountRes.rows[0] as any).count,
+      patients: (patientsCountRes.rows[0] as any).count,
+      therapists: (therapistsCountRes.rows[0] as any).count,
       admins: (adminsCountRes.rows[0] as any).count,
     };
 
@@ -56,10 +56,10 @@ export async function GET(request: Request) {
         u.created_at,
         u.is_verified,
         u.is_active,
-        COALESCE(s.username, t.full_name, a.full_name, u.email) as display_name
+        COALESCE(p.username, t.full_name, a.full_name, u.email) as display_name
       FROM users u
-      LEFT JOIN students s ON u.id = s.user_id
-      LEFT JOIN teachers t ON u.id = t.user_id
+      LEFT JOIN patients p ON u.id = p.user_id
+      LEFT JOIN therapists t ON u.id = t.user_id
       LEFT JOIN admins a ON u.id = a.user_id
       ORDER BY u.created_at DESC
       LIMIT 20`,
@@ -91,14 +91,14 @@ export async function GET(request: Request) {
       cancelled: (cancelledSessionsRes.rows[0] as any).count,
     };
 
-    // Get pending teacher approvals count
-    const pendingTeachersRes = await db.execute({
+    // Get pending therapist approvals count
+    const pendingTherapistsRes = await db.execute({
       sql: `SELECT COUNT(*) as count 
       FROM users 
-      WHERE role = 'teacher' AND is_verified = 0 AND is_active = 1`,
+      WHERE role = 'therapist' AND is_verified = 0 AND is_active = 1`,
       args: []
     });
-    const pendingTeachers = (pendingTeachersRes.rows[0] as any).count;
+    const pendingTherapists = (pendingTherapistsRes.rows[0] as any).count;
 
     return NextResponse.json({
       success: true,
@@ -108,7 +108,7 @@ export async function GET(request: Request) {
         recentUsers,
         activeUsers,
         sessionStats,
-        pendingTeachers,
+        pendingTherapists,
       },
     });
   } catch (error: any) {

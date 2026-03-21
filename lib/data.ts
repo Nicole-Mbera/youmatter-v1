@@ -7,7 +7,7 @@ export const HERO_STATS = [
 export const WHY_BODYWISE = [
   {
     title: "Personalized Learning Paths",
-    description: "Education tailored to your unique goals, learning style, and pace. No more one-size-fits-all approaches that leave students behind or hold others back."
+    description: "Education tailored to your unique goals, learning style, and pace. No more one-size-fits-all approaches that leave patients behind or hold others back."
   },
   {
     title: "Direct Expert Connection",
@@ -111,7 +111,7 @@ export const TESTIMONIALS = [
     name: "Sarah J.",
     location: "Afganistan, Kabul",
     quote:
-      "As a working professional, AEON's flexible scheduling and expert teachers allowed me to advance my marketing skills without compromising my job. The digital library resources were incredibly valuable.",
+      "As a working professional, youmatter's flexible scheduling and expert therapists allowed me to advance my marketing skills without compromising my job. The digital library resources were incredibly valuable.",
     avatar:
       "https://images.unsplash.com/photo-1494790108755-2616b612b786?auto=format&fit=crop&w=256&q=80",
     rating: 5,
@@ -120,7 +120,7 @@ export const TESTIMONIALS = [
     name: "David K.",
     location: "UAE",
     quote:
-      "AEON connected me with a mentor who helped learn English faster. The personalized sessions were exactly what I needed to bridge the gap between theory and practice.",
+      "youmatter connected me with a mentor who helped learn English faster. The personalized sessions were exactly what I needed to bridge the gap between theory and practice.",
     avatar:
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=256&q=80",
     rating: 5,
@@ -130,7 +130,7 @@ export const TESTIMONIALS = [
     name: "Marcus T.",
     location: "Lagos, Nigeria",
     quote:
-      "The one-on-one sessions with industry experts gave me real-world insights I couldn't get from traditional courses. AEON truly breaks down traditional educational barriers.",
+      "The one-on-one sessions with industry experts gave me real-world insights I couldn't get from traditional courses. youmatter truly breaks down traditional educational barriers.",
     avatar:
       "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?auto=format&fit=crop&w=256&q=80",
     rating: 5,
@@ -140,12 +140,12 @@ export const TESTIMONIALS = [
 export const JOIN_ROLES = [
   {
     key: "user",
-    title: "Student",
+    title: "patient",
     description:
-      "Learn English with personalized lessons from expert teachers and access comprehensive learning resources.",
+      "Learn English with personalized lessons from expert therapists and access comprehensive learning resources.",
     perks: [
       "Personalized English lessons tailored to your learning goals",
-      "Direct video sessions with verified English teachers",
+      "Direct video sessions with verified English therapists",
       "Access to comprehensive learning resources and materials",
     ],
     href: "/signup?role=user",

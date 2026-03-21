@@ -1,12 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@libsql/client';
+import db from '@/lib/db';
 
-const client = createClient({
-  url: process.env.TURSO_DATABASE_URL || 'file:youmatter.db',
-  authToken: process.env.TURSO_AUTH_TOKEN,
-});
-
-// GET /api/patient/clinician/[id] - Get therapist profile by ID
+// GET /api/patient/therapist/[id] - Get therapist profile by ID
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
@@ -18,7 +13,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       );
     }
 
-    const therapistRes = await client.execute({
+    const therapistRes = await db.execute({
       sql: `SELECT t.*, u.email, u.is_verified, u.is_active
             FROM therapists t
             JOIN users u ON t.user_id = u.id
@@ -36,7 +31,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
 
     // Get reviews for this therapist
-    const reviewsRes = await client.execute({
+    const reviewsRes = await db.execute({
       sql: `SELECT r.*, p.full_name as patient_name
             FROM session_reviews r
             JOIN patients p ON r.patient_id = p.id

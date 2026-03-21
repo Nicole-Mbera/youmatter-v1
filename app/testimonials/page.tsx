@@ -90,8 +90,8 @@ export default function TestimonialsPage() {
 
   const getUserTypeLabel = (type: string) => {
     switch (type) {
-      case 'patient': return 'Student';
-      case 'teacher': return 'Teacher';
+      case 'patient': return 'patient';
+      case 'therapist': return 'therapist';
       case 'admin': return 'Administrator';
       default: return 'User';
     }
@@ -103,9 +103,9 @@ export default function TestimonialsPage() {
       {/* Header */}
       <div className="bg-black text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">What Our Students Say</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">What Our patients Say</h1>
           <p className="text-xl text-white/80 mb-6">
-            Real experiences from people who have transformed their English skills through AEON
+            Real experiences from people who have transformed their English skills through youmatter
           </p>
           <button
             onClick={() => setShowSubmitForm(!showSubmitForm)}
@@ -150,7 +150,7 @@ export default function TestimonialsPage() {
                 <textarea
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Share your experience with AEON - how has it helped you on your English learning journey?"
+                  placeholder="Share your experience with youmatter - how has it helped you on your English learning journey?"
                   className="w-full rounded-2xl border border-black/20 bg-white px-4 py-3 text-sm text-black placeholder:text-black/50 focus:border-black focus:outline-none focus:ring-2 focus:ring-black/20"
                   rows={6}
                   required
@@ -254,7 +254,7 @@ export default function TestimonialsPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to start your English learning journey?</h2>
           <p className="text-xl text-white/80 mb-8">
-            Join thousands who have transformed their English skills through AEON
+            Join thousands who have transformed their English skills through youmatter
           </p>
           <Link
             href="/signup"

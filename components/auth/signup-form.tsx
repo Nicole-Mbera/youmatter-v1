@@ -45,15 +45,15 @@ export function SignupForm({ preSelectedRole }: SignupFormProps = {}) {
     email: '',
     password: '',
     confirmPassword: '',
-    // Student fields
+    // patient fields
     username: '',
     // Common fields
     full_name: '',
     phone: '',
-    // Student specific
+    // patient specific
     date_of_birth: '',
     gender: '',
-    // Teacher fields
+    // therapist fields
     specialization: '',
     years_of_experience: '',
     bio: '',
@@ -62,7 +62,7 @@ export function SignupForm({ preSelectedRole }: SignupFormProps = {}) {
     country: '',
     contact_email: '',
     mission: '',
-    // Teacher documents
+    // therapist documents
     documents: [] as File[],
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -166,10 +166,10 @@ export function SignupForm({ preSelectedRole }: SignupFormProps = {}) {
 
       if (selectedRole === 'patient') {
         payload.username = formData.username;
-        payload.full_name = formData.full_name;
-        payload.date_of_birth = formData.date_of_birth;
-        payload.gender = formData.gender;
-        payload.phone = formData.phone;
+        if (formData.full_name) payload.full_name = formData.full_name;
+        if (formData.date_of_birth) payload.date_of_birth = formData.date_of_birth;
+        if (formData.gender) payload.gender = formData.gender;
+        if (formData.phone) payload.phone = formData.phone;
       } else if (selectedRole === 'therapist') {
         payload.full_name = formData.full_name;
         payload.specialization = formData.specialization;
@@ -482,7 +482,7 @@ export function SignupForm({ preSelectedRole }: SignupFormProps = {}) {
           </>
         )}
 
-        {/* teacher fields with document upload */}
+        {/* therapist fields with document upload */}
         {selectedRole === 'therapist' && (
           <>
             <div className="space-y-2">
@@ -616,7 +616,7 @@ export function SignupForm({ preSelectedRole }: SignupFormProps = {}) {
                 onChange={handleChange}
                 rows={4}
                 className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 shadow-sm focus:border-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                placeholder="Share how you support language learning and cultural exchange for international students."
+                placeholder="Share how you support language learning and cultural exchange for international patients."
               />
             </div>
 
@@ -630,13 +630,13 @@ export function SignupForm({ preSelectedRole }: SignupFormProps = {}) {
                 disabled={isLoading}
                 rows={3}
                 className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 focus:border-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                placeholder="Tell us about your teaching experience and methodology..."
+                placeholder="Tell us about experience ..."
               />
             </div>
 
             <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Teacher Verification Documents
+                therapist Verification Documents
               </h3>
               <p className="text-sm text-gray-600 mb-4">
                 Please upload the following required documents (PDF, DOCX, or PNG).
@@ -666,11 +666,6 @@ export function SignupForm({ preSelectedRole }: SignupFormProps = {}) {
                   </div>
                 ))}
               </div>
-            </div>
-
-            <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4 text-xs text-gray-700">
-              <p className="font-semibold mb-1">Verification Required</p>
-              <p>Your teaching credentials and documents will be reviewed for verification. You'll receive an email once approved.</p>
             </div>
           </>
         )}

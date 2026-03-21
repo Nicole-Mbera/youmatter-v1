@@ -9,30 +9,26 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const featured = searchParams.get('featured') === 'true';
 
+    // DB schema: testimonial_text, patient_id/therapist_id, is_approved BOOLEAN
     let query = `
-      SELECT 
+      SELECT
         t.id,
-        t.content,
+        t.testimonial_text AS content,
         t.rating,
         t.created_at,
-        t.user_type,
-        CASE 
-          WHEN t.user_type = 'student' THEN s.full_name
-          WHEN t.user_type = 'teacher' THEN hp.full_name
-        END as user_name,
-        CASE 
-          WHEN t.user_type = 'student' THEN 'Student'
-          WHEN t.user_type = 'teacher' THEN hp.specialization
-          ELSE NULL
-        END as user_role_display
+        CASE WHEN t.patient_id IS NOT NULL THEN 'patient' ELSE 'therapist' END AS user_type,
+        COALESCE(p.full_name, th.full_name) AS user_name,
+        CASE
+          WHEN t.patient_id IS NOT NULL THEN 'patient'
+          ELSE th.specialization
+        END AS user_role_display
       FROM testimonials t
-      JOIN users u ON t.user_id = u.id
-      LEFT JOIN students s ON t.user_type = 'student' AND u.id = s.user_id
-      LEFT JOIN teachers hp ON t.user_type = 'teacher' AND u.id = hp.user_id
-      WHERE t.approval_status = 'approved'
+      LEFT JOIN patients p ON t.patient_id = p.id
+      LEFT JOIN therapists th ON t.therapist_id = th.id
+      WHERE t.is_approved = 1
     `;
 
-    const params = [];
+    const params: any[] = [];
 
     if (featured) {
       query += ' AND t.is_featured = 1';
@@ -41,10 +37,7 @@ export async function GET(request: Request) {
     query += ' ORDER BY t.created_at DESC LIMIT ?';
     params.push(limit);
 
-    const testimonialsRes = await db.execute({
-      sql: query,
-      args: params
-    });
+    const testimonialsRes = await db.execute({ sql: query, args: params });
 
     return NextResponse.json({
       success: true,
@@ -81,29 +74,72 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if user has already left a testimonial (limit 1 per user for now)
-    const existingRes = await db.execute({
-      sql: 'SELECT id FROM testimonials WHERE user_id = ?',
-      args: [currentUser.userId]
-    });
+    const userRole = currentUser.role === 'admin' ? 'patient' : currentUser.role;
 
-    if (existingRes.rows.length > 0) {
-      return NextResponse.json(
-        { error: 'You have already submitted a testimonial.' },
-        { status: 400 }
-      );
+    if (userRole === 'patient') {
+      // Look up patient record
+      const patientRes = await db.execute({
+        sql: 'SELECT id FROM patients WHERE user_id = ?',
+        args: [currentUser.userId],
+      });
+      const patient = patientRes.rows[0] as any;
+
+      if (!patient) {
+        return NextResponse.json(
+          { error: 'Patient profile not found.' },
+          { status: 404 }
+        );
+      }
+
+      // Check for existing testimonial
+      const existingRes = await db.execute({
+        sql: 'SELECT id FROM testimonials WHERE patient_id = ?',
+        args: [patient.id],
+      });
+      if (existingRes.rows.length > 0) {
+        return NextResponse.json(
+          { error: 'You have already submitted a testimonial.' },
+          { status: 400 }
+        );
+      }
+
+      await db.execute({
+        sql: `INSERT INTO testimonials (patient_id, testimonial_text, rating, is_approved, is_featured)
+              VALUES (?, ?, ?, 0, 0)`,
+        args: [patient.id, content, rating],
+      });
+    } else {
+      // therapist
+      const therapistRes = await db.execute({
+        sql: 'SELECT id FROM therapists WHERE user_id = ?',
+        args: [currentUser.userId],
+      });
+      const therapist = therapistRes.rows[0] as any;
+
+      if (!therapist) {
+        return NextResponse.json(
+          { error: 'Therapist profile not found.' },
+          { status: 404 }
+        );
+      }
+
+      const existingRes = await db.execute({
+        sql: 'SELECT id FROM testimonials WHERE therapist_id = ?',
+        args: [therapist.id],
+      });
+      if (existingRes.rows.length > 0) {
+        return NextResponse.json(
+          { error: 'You have already submitted a testimonial.' },
+          { status: 400 }
+        );
+      }
+
+      await db.execute({
+        sql: `INSERT INTO testimonials (therapist_id, testimonial_text, rating, is_approved, is_featured)
+              VALUES (?, ?, ?, 0, 0)`,
+        args: [therapist.id, content, rating],
+      });
     }
-
-    // Get user type (student or teacher)
-    // We can infer this from the user's role in the token, but let's double check DB role
-    // For now using the role from the token is safe enough for this purpose
-    const userRole = currentUser.role === 'admin' ? 'student' : currentUser.role; // Admins shouldn't really leave testimonials but fallback to student
-
-    await db.execute({
-      sql: `INSERT INTO testimonials (user_id, user_type, content, rating, approval_status, is_featured)
-      VALUES (?, ?, ?, ?, 'pending', 0)`,
-      args: [currentUser.userId, userRole, content, rating]
-    });
 
     return NextResponse.json({
       success: true,

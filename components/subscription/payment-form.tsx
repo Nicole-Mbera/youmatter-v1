@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 // Main form component that uses Stripe hooks
-function SubscriptionCheckoutForm({ redirectUrl = "/student/assessment" }: { redirectUrl?: string }) {
+function SubscriptionCheckoutForm({ redirectUrl = "/patient/assessment" }: { redirectUrl?: string }) {
     const stripe = useStripe();
     const elements = useElements();
     const router = useRouter();

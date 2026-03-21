@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth-context';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles: Array<'student' | 'teacher' | 'admin' | 'patient' | 'therapist' | 'clinician'>;
+  allowedRoles: Array<'patient' | 'therapist' | 'admin'>;
 }
 
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
@@ -22,10 +22,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
         // Authenticated but wrong role, redirect to their dashboard
         const redirectMap: Record<string, string> = {
           'admin': '/admin',
-          'teacher': '/teacher',
-          'student': '/user',
           'therapist': '/clinician',
-          'clinician': '/clinician',
           'patient': '/patient',
         };
         router.push(redirectMap[user.role] || '/login');

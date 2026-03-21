@@ -3,13 +3,13 @@ import { sendEmail, emailTemplates } from './email';
 
 interface Consultation {
   id: number;
-  student_id: number;
+  patient_id: number;
   professional_id: number;
   start_time: string;
   status: string;
   meeting_link: string;
-  student_email: string;
-  student_name: string;
+  patient_email: string;
+  patient_name: string;
   professional_name: string;
   professional_email: string;
   reminder_24h_sent: number;
@@ -32,7 +32,7 @@ export async function send24HourReminders() {
     sql: `
     SELECT 
       c.id,
-      c.student_id,
+      c.patient_id,
       c.professional_id,
       c.start_time,
       c.status,
@@ -41,14 +41,14 @@ export async function send24HourReminders() {
       c.reminder_1h_sent,
       c.doctor_reminder_24h_sent,
       c.doctor_reminder_1h_sent,
-      u.email as student_email,
-      p.full_name as student_name,
+      u.email as patient_email,
+      p.full_name as patient_name,
       hp.full_name as professional_name,
       du.email as professional_email
     FROM sessions c
-    JOIN students p ON c.student_id = p.id
+    JOIN patients p ON c.patient_id = p.id
     JOIN users u ON p.user_id = u.id
-    JOIN teachers hp ON c.professional_id = hp.id
+    JOIN therapists hp ON c.professional_id = hp.id
     JOIN users du ON hp.user_id = du.id
     WHERE c.status = 'scheduled'
     AND c.start_time BETWEEN ? AND ?
@@ -64,7 +64,7 @@ export async function send24HourReminders() {
     try {
       const startTime = new Date(consultation.start_time);
       const template = emailTemplates.reminder24h({
-        studentName: consultation.student_name,
+        patientName: consultation.patient_name,
         mentorName: consultation.professional_name,
         date: startTime.toLocaleDateString('en-US', {
           weekday: 'long',
@@ -80,11 +80,11 @@ export async function send24HourReminders() {
       });
 
       // Send to patient
-      const patientResult = await sendEmail(consultation.student_email, template);
+      const patientResult = await sendEmail(consultation.patient_email, template);
 
-      // Send to teacher
+      // Send to therapist
       const doctorTemplate = emailTemplates.reminder24h({
-        studentName: consultation.student_name,
+        patientName: consultation.patient_name,
         mentorName: consultation.professional_name,
         date: startTime.toLocaleDateString('en-US', {
           weekday: 'long',
@@ -102,7 +102,7 @@ export async function send24HourReminders() {
 
       if (patientResult.success) {
         await db.execute({ sql: 'UPDATE sessions SET reminder_24h_sent = 1 WHERE id = ?', args: [consultation.id] });
-        console.log(`24h reminder sent to patient ${consultation.student_email} for consultation #${consultation.id}`);
+        console.log(`24h reminder sent to patient ${consultation.patient_email} for consultation #${consultation.id}`);
       } else {
         console.error(`Failed to send 24h reminder to patient for consultation #${consultation.id}: ${patientResult.error}`);
       }
@@ -134,7 +134,7 @@ export async function send1HourReminders() {
     sql: `
     SELECT 
       c.id,
-      c.student_id,
+      c.patient_id,
       c.professional_id,
       c.start_time,
       c.status,
@@ -143,14 +143,14 @@ export async function send1HourReminders() {
       c.reminder_1h_sent,
       c.doctor_reminder_24h_sent,
       c.doctor_reminder_1h_sent,
-      u.email as student_email,
-      p.full_name as student_name,
+      u.email as patient_email,
+      p.full_name as patient_name,
       hp.full_name as professional_name,
       du.email as professional_email
     FROM sessions c
-    JOIN students p ON c.student_id = p.id
+    JOIN patients p ON c.patient_id = p.id
     JOIN users u ON p.user_id = u.id
-    JOIN teachers hp ON c.professional_id = hp.id
+    JOIN therapists hp ON c.professional_id = hp.id
     JOIN users du ON hp.user_id = du.id
     WHERE c.status = 'scheduled'
     AND c.start_time BETWEEN ? AND ?
@@ -166,7 +166,7 @@ export async function send1HourReminders() {
     try {
       const startTime = new Date(consultation.start_time);
       const template = emailTemplates.reminder1h({
-        studentName: consultation.student_name,
+        patientName: consultation.patient_name,
         mentorName: consultation.professional_name,
         time: startTime.toLocaleTimeString('en-US', {
           hour: '2-digit',
@@ -176,11 +176,11 @@ export async function send1HourReminders() {
       });
 
       // Send to patient
-      const patientResult = await sendEmail(consultation.student_email, template);
+      const patientResult = await sendEmail(consultation.patient_email, template);
 
-      // Send to teacher
+      // Send to therapist
       const doctorTemplate = emailTemplates.reminder1h({
-        studentName: consultation.student_name,
+        patientName: consultation.patient_name,
         mentorName: consultation.professional_name,
         time: startTime.toLocaleTimeString('en-US', {
           hour: '2-digit',
@@ -192,7 +192,7 @@ export async function send1HourReminders() {
 
       if (patientResult.success) {
         await db.execute({ sql: 'UPDATE sessions SET reminder_1h_sent = 1 WHERE id = ?', args: [consultation.id] });
-        console.log(`1h reminder sent to patient ${consultation.student_email} for consultation #${consultation.id}`);
+        console.log(`1h reminder sent to patient ${consultation.patient_email} for consultation #${consultation.id}`);
       } else {
         console.error(`Failed to send 1h reminder to patient for consultation #${consultation.id}: ${patientResult.error}`);
       }
@@ -220,19 +220,19 @@ export async function sendConfirmationEmail(consultationId: number) {
     sql: `
     SELECT 
       c.id,
-      c.student_id,
+      c.patient_id,
       c.professional_id,
       c.start_time,
       c.status,
       c.meeting_link,
-      u.email as student_email,
-      p.full_name as student_name,
+      u.email as patient_email,
+      p.full_name as patient_name,
       hp.full_name as professional_name,
       du.email as professional_email
     FROM sessions c
-    JOIN students p ON c.student_id = p.id
+    JOIN patients p ON c.patient_id = p.id
     JOIN users u ON p.user_id = u.id
-    JOIN teachers hp ON c.professional_id = hp.id
+    JOIN therapists hp ON c.professional_id = hp.id
     JOIN users du ON hp.user_id = du.id
     WHERE c.id = ?
   `,
@@ -246,7 +246,7 @@ export async function sendConfirmationEmail(consultationId: number) {
 
   const startTime = new Date(consultation.start_time);
   const template = emailTemplates.confirmation({
-    studentName: consultation.student_name,
+    patientName: consultation.patient_name,
     mentorName: consultation.professional_name,
     date: startTime.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -261,12 +261,12 @@ export async function sendConfirmationEmail(consultationId: number) {
     meetingLink: consultation.meeting_link,
   });
 
-  // Send to student
-  const patientResult = await sendEmail(consultation.student_email, template);
+  // Send to patient
+  const patientResult = await sendEmail(consultation.patient_email, template);
 
-  // Send to teacher
+  // Send to therapist
   const doctorTemplate = emailTemplates.confirmation({
-    studentName: consultation.student_name,
+    patientName: consultation.patient_name,
     mentorName: consultation.professional_name,
     date: startTime.toLocaleDateString('en-US', {
       weekday: 'long',

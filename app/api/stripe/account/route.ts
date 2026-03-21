@@ -10,7 +10,7 @@ const stripe = stripeKey ? new Stripe(stripeKey) : null;
 export async function POST(request: Request) {
     try {
         const user = getUserFromRequest(request);
-        if (!user || user.role !== 'teacher') {
+        if (!user || user.role !== 'therapist') {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -18,18 +18,18 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Stripe configuration missing" }, { status: 503 });
         }
 
-        // 1. Get Teacher Profile
-        const teacherRes = await client.execute({
-            sql: "SELECT * FROM teachers WHERE user_id = ?",
+        // 1. Get Therapist Profile
+        const therapistRes = await client.execute({
+            sql: "SELECT * FROM therapists WHERE user_id = ?",
             args: [user.userId],
         });
-        const teacher = teacherRes.rows[0] as any;
+        const therapist = therapistRes.rows[0] as any;
 
-        if (!teacher) {
-            return NextResponse.json({ error: "Teacher profile not found" }, { status: 404 });
+        if (!therapist) {
+            return NextResponse.json({ error: "Therapist profile not found" }, { status: 404 });
         }
 
-        let accountId = teacher.stripe_account_id;
+        let accountId = therapist.stripe_account_id;
 
         // 2. Create Stripe Account if doesn't exist
         if (!accountId) {
@@ -47,15 +47,15 @@ export async function POST(request: Request) {
 
             // Save to DB
             await client.execute({
-                sql: "UPDATE teachers SET stripe_account_id = ? WHERE id = ?",
-                args: [accountId, teacher.id],
+                sql: "UPDATE therapists SET stripe_account_id = ? WHERE id = ?",
+                args: [accountId, therapist.id],
             });
         }
 
         // 3. Create Account Link
         const accountLink = await stripe.accountLinks.create({
             account: accountId,
-            refresh_url: `${request.headers.get("origin")}/teacher`, // Redirect back to dashboard on failure/reauth
+            refresh_url: `${request.headers.get("origin")}/therapist`, // Redirect back to dashboard on failure/reauth
             return_url: `${request.headers.get("origin")}/api/stripe/return?account_id=${accountId}`, // Handler for success
             type: "account_onboarding",
         });

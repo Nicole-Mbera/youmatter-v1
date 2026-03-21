@@ -1,12 +1,12 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "AEON API Documentation",
+    "title": "youmatter API Documentation",
     "version": "1.0.0",
-    "description": "Comprehensive REST API documentation for AEON English Learning Platform",
+    "description": "Comprehensive REST API documentation for youmatter English Learning Platform",
     "contact": {
-      "name": "AEON Support",
-      "email": "support@aeon.com"
+      "name": "youmatter Support",
+      "email": "support@youmatter.com"
     },
     "license": {
       "name": "MIT",
@@ -19,7 +19,7 @@
       "description": "Development server"
     },
     {
-      "url": "https://aeon.com",
+      "url": "https://youmatter.com",
       "description": "Production server"
     }
   ],
@@ -29,12 +29,12 @@
       "description": "User authentication and authorization endpoints"
     },
     {
-      "name": "Students",
-      "description": "Student-specific endpoints for booking lessons and managing profile"
+      "name": "patients",
+      "description": "patient-specific endpoints for booking lessons and managing profile"
     },
     {
-      "name": "Teachers",
-      "description": "Teacher endpoints for managing lessons, availability, and profile"
+      "name": "therapists",
+      "description": "therapist endpoints for managing lessons, availability, and profile"
     },
     {
       "name": "Lessons",
@@ -46,7 +46,7 @@
     },
     {
       "name": "Reviews",
-      "description": "Teacher reviews and ratings"
+      "description": "therapist reviews and ratings"
     },
     {
       "name": "Users",
@@ -84,8 +84,8 @@
           "role": {
             "type": "string",
             "enum": [
-              "student",
-              "teacher",
+              "patient",
+              "therapist",
               "system_admin"
             ]
           },
@@ -97,7 +97,7 @@
           }
         }
       },
-      "Student": {
+      "patient": {
         "type": "object",
         "properties": {
           "id": {
@@ -138,7 +138,7 @@
           }
         }
       },
-      "Teacher": {
+      "therapist": {
         "type": "object",
         "properties": {
           "id": {
@@ -179,10 +179,10 @@
           "id": {
             "type": "integer"
           },
-          "student_id": {
+          "patient_id": {
             "type": "integer"
           },
-          "teacher_id": {
+          "therapist_id": {
             "type": "integer"
           },
           "scheduled_date": {
@@ -301,7 +301,7 @@
                   "email": {
                     "type": "string",
                     "format": "email",
-                    "example": "student@aeon.com"
+                    "example": "patient@youmatter.com"
                   },
                   "password": {
                     "type": "string",
@@ -360,7 +360,7 @@
           "Authentication"
         ],
         "summary": "User registration",
-        "description": "Register a new student or teacher account",
+        "description": "Register a new patient or therapist account",
         "requestBody": {
           "required": true,
           "content": {
@@ -387,7 +387,7 @@
                       "role": {
                         "type": "string",
                         "enum": [
-                          "student"
+                          "patient"
                         ]
                       },
                       "username": {
@@ -431,7 +431,7 @@
                       "role": {
                         "type": "string",
                         "enum": [
-                          "teacher"
+                          "therapist"
                         ]
                       },
                       "full_name": {
@@ -469,13 +469,13 @@
         }
       }
     },
-    "/api/student/lessons": {
+    "/api/patient/lessons": {
       "post": {
         "tags": [
           "Lessons"
         ],
         "summary": "Book a lesson",
-        "description": "Book a one-on-one lesson with a teacher",
+        "description": "Book a one-on-one lesson with a therapist",
         "security": [
           {
             "cookieAuth": []
@@ -491,12 +491,12 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "teacher_id",
+                  "therapist_id",
                   "scheduled_date",
                   "scheduled_time"
                 ],
                 "properties": {
-                  "teacher_id": {
+                  "therapist_id": {
                     "type": "integer"
                   },
                   "scheduled_date": {
@@ -541,10 +541,10 @@
       "get": {
         "tags": [
           "Lessons",
-          "Students"
+          "patients"
         ],
-        "summary": "Get student's lessons",
-        "description": "Retrieve all lessons for the current student",
+        "summary": "Get patient's lessons",
+        "description": "Retrieve all lessons for the current patient",
         "security": [
           {
             "cookieAuth": []
@@ -580,7 +580,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of student's lessons",
+            "description": "List of patient's lessons",
             "content": {
               "application/json": {
                 "schema": {
@@ -686,13 +686,13 @@
         }
       }
     },
-    "/api/teachers": {
+    "/api/therapists": {
       "get": {
         "tags": [
-          "Teachers"
+          "therapists"
         ],
-        "summary": "Get all verified teachers",
-        "description": "Retrieve list of verified teachers with filters",
+        "summary": "Get all verified therapists",
+        "description": "Retrieve list of verified therapists with filters",
         "parameters": [
           {
             "in": "query",
@@ -721,7 +721,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of teachers",
+            "description": "List of therapists",
             "content": {
               "application/json": {
                 "schema": {
@@ -733,7 +733,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Teacher"
+                        "$ref": "#/components/schemas/therapist"
                       }
                     }
                   }
@@ -744,13 +744,13 @@
         }
       }
     },
-    "/api/student/profile": {
+    "/api/patient/profile": {
       "get": {
         "tags": [
-          "Students"
+          "patients"
         ],
-        "summary": "Get student profile",
-        "description": "Retrieve current student's profile information",
+        "summary": "Get patient profile",
+        "description": "Retrieve current patient's profile information",
         "security": [
           {
             "cookieAuth": []
@@ -761,26 +761,26 @@
         ],
         "responses": {
           "200": {
-            "description": "Student profile",
+            "description": "patient profile",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Student"
+                  "$ref": "#/components/schemas/patient"
                 }
               }
             }
           },
           "403": {
-            "description": "Unauthorized or not a student"
+            "description": "Unauthorized or not a patient"
           }
         }
       },
       "put": {
         "tags": [
-          "Students"
+          "patients"
         ],
-        "summary": "Update student profile",
-        "description": "Update current student's profile information",
+        "summary": "Update patient profile",
+        "description": "Update current patient's profile information",
         "security": [
           {
             "cookieAuth": []
@@ -837,13 +837,13 @@
         }
       }
     },
-    "/api/teacher/profile": {
+    "/api/therapist/profile": {
       "get": {
         "tags": [
-          "Teachers"
+          "therapists"
         ],
-        "summary": "Get teacher profile",
-        "description": "Retrieve current teacher's profile information",
+        "summary": "Get therapist profile",
+        "description": "Retrieve current therapist's profile information",
         "security": [
           {
             "cookieAuth": []
@@ -854,26 +854,26 @@
         ],
         "responses": {
           "200": {
-            "description": "Teacher profile",
+            "description": "therapist profile",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Teacher"
+                  "$ref": "#/components/schemas/therapist"
                 }
               }
             }
           },
           "403": {
-            "description": "Unauthorized or not a teacher"
+            "description": "Unauthorized or not a therapist"
           }
         }
       },
       "put": {
         "tags": [
-          "Teachers"
+          "therapists"
         ],
-        "summary": "Update teacher profile",
-        "description": "Update current teacher's profile information",
+        "summary": "Update therapist profile",
+        "description": "Update current therapist's profile information",
         "security": [
           {
             "cookieAuth": []
@@ -922,14 +922,14 @@
         }
       }
     },
-    "/api/teacher/lessons": {
+    "/api/therapist/lessons": {
       "get": {
         "tags": [
           "Lessons",
-          "Teachers"
+          "therapists"
         ],
-        "summary": "Get teacher's lessons",
-        "description": "Retrieve all lessons for the current teacher",
+        "summary": "Get therapist's lessons",
+        "description": "Retrieve all lessons for the current therapist",
         "security": [
           {
             "cookieAuth": []
@@ -964,7 +964,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of teacher's lessons",
+            "description": "List of therapist's lessons",
             "content": {
               "application/json": {
                 "schema": {
@@ -990,13 +990,13 @@
         }
       }
     },
-    "/api/teacher/availability": {
+    "/api/therapist/availability": {
       "get": {
         "tags": [
-          "Teachers"
+          "therapists"
         ],
-        "summary": "Get teacher availability",
-        "description": "Retrieve teacher's available time slots",
+        "summary": "Get therapist availability",
+        "description": "Retrieve therapist's available time slots",
         "security": [
           {
             "cookieAuth": []
@@ -1025,7 +1025,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Teacher availability slots"
+            "description": "therapist availability slots"
           },
           "403": {
             "description": "Unauthorized"
@@ -1034,10 +1034,10 @@
       },
       "post": {
         "tags": [
-          "Teachers"
+          "therapists"
         ],
-        "summary": "Set teacher availability",
-        "description": "Set or update teacher's available time slots",
+        "summary": "Set therapist availability",
+        "description": "Set or update therapist's available time slots",
         "security": [
           {
             "cookieAuth": []
@@ -1096,8 +1096,8 @@
         "tags": [
           "Reviews"
         ],
-        "summary": "Submit teacher review",
-        "description": "Submit a review and rating for a teacher after lesson",
+        "summary": "Submit therapist review",
+        "description": "Submit a review and rating for a therapist after lesson",
         "security": [
           {
             "cookieAuth": []
@@ -1113,12 +1113,12 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "teacher_id",
+                  "therapist_id",
                   "lesson_id",
                   "rating"
                 ],
                 "properties": {
-                  "teacher_id": {
+                  "therapist_id": {
                     "type": "integer"
                   },
                   "lesson_id": {
@@ -1175,8 +1175,8 @@
             "schema": {
               "type": "string",
               "enum": [
-                "student",
-                "teacher",
+                "patient",
+                "therapist",
                 "system_admin"
               ]
             }
@@ -1232,10 +1232,10 @@
                     "total_users": {
                       "type": "integer"
                     },
-                    "total_students": {
+                    "total_patients": {
                       "type": "integer"
                     },
-                    "total_teachers": {
+                    "total_therapists": {
                       "type": "integer"
                     },
                     "total_lessons": {

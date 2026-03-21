@@ -46,7 +46,6 @@ export async function POST(request: Request) {
             Key: fileName,
             Body: buffer,
             ContentType: file.type,
-            ACL: 'public-read', // Ensure it's public
         });
 
         await s3Client.send(command);

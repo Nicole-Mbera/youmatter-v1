@@ -69,29 +69,20 @@ export async function authenticateUser(email: string, password: string) {
       return { success: false, message: 'Account is inactive' };
     }
 
-    // Check if teacher account is verified
-    // if (user.role === 'teacher' && !user.is_verified) {
-    //   return { success: false, message: 'Your account is pending admin approval. Please wait for verification.' };
-    // }
-
     const isPasswordValid = await comparePassword(password, user.password_hash);
 
     if (!isPasswordValid) {
       return { success: false, message: 'Invalid email or password' };
     }
 
-    // Map DB roles to UI roles (support both old and new schema)
-    const roleMap: Record<string, 'student' | 'teacher' | 'admin'> = {
-      'student': 'student',
-      'teacher': 'teacher',
-      'admin': 'admin',
-    };
-    const mappedRole = roleMap[user.role] || 'student';
+    const role = (user.role === 'patient' || user.role === 'therapist' || user.role === 'admin')
+      ? user.role
+      : 'patient';
 
     const token = generateToken({
       userId: user.id,
       email: user.email,
-      role: mappedRole,
+      role,
       subscription_status: user.subscription_status,
       is_verified: user.is_verified,
     });
@@ -102,7 +93,7 @@ export async function authenticateUser(email: string, password: string) {
       user: {
         id: user.id,
         email: user.email,
-        role: mappedRole,
+        role,
         isVerified: user.is_verified,
         subscription_status: user.subscription_status,
       },

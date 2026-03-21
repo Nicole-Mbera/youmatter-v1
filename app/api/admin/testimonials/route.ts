@@ -15,44 +15,42 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status'); // 'pending', 'approved', 'rejected', or all
+    const status = searchParams.get('status');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = (page - 1) * limit;
 
+    // DB schema uses testimonial_text, patient_id/therapist_id, is_approved (BOOLEAN)
     let query = `
-      SELECT 
+      SELECT
         t.id,
-        t.content,
+        t.testimonial_text AS content,
         t.rating,
         t.is_featured,
-        t.approval_status,
+        t.is_approved,
+        CASE WHEN t.is_approved = 1 THEN 'approved' ELSE 'pending' END AS approval_status,
         t.created_at,
-        t.user_type,
-        t.user_id,
-        u.email as user_email,
-        CASE 
-          WHEN t.user_type = 'student' THEN s.full_name
-          WHEN t.user_type = 'teacher' THEN hp.full_name
-        END as user_name,
-        CASE 
-          WHEN t.user_type = 'student' THEN s.full_name
-          WHEN t.user_type = 'teacher' THEN hp.specialization
-          ELSE NULL
-        END as additional_info
+        CASE WHEN t.patient_id IS NOT NULL THEN 'patient' ELSE 'therapist' END AS user_type,
+        COALESCE(pu.email, tu.email) AS user_email,
+        COALESCE(p.full_name, th.full_name) AS user_name,
+        CASE
+          WHEN t.patient_id IS NOT NULL THEN p.full_name
+          ELSE th.specialization
+        END AS additional_info
       FROM testimonials t
-      JOIN users u ON t.user_id = u.id
-      LEFT JOIN students s ON t.user_type = 'student' AND u.id = s.user_id
-      LEFT JOIN teachers hp ON t.user_type = 'teacher' AND u.id = hp.user_id
+      LEFT JOIN patients p ON t.patient_id = p.id
+      LEFT JOIN users pu ON p.user_id = pu.id
+      LEFT JOIN therapists th ON t.therapist_id = th.id
+      LEFT JOIN users tu ON th.user_id = tu.id
       WHERE 1=1
     `;
 
     const params: any[] = [];
 
     if (status === 'pending') {
-      query += " AND t.approval_status = 'pending'";
+      query += ' AND t.is_approved = 0';
     } else if (status === 'approved') {
-      query += " AND t.approval_status = 'approved'";
+      query += ' AND t.is_approved = 1';
     }
 
     query += ' ORDER BY t.created_at DESC LIMIT ? OFFSET ?';
@@ -66,9 +64,9 @@ export async function GET(request: Request) {
     const countParams: any[] = [];
 
     if (status === 'pending') {
-      countQuery += " AND approval_status = 'pending'";
+      countQuery += ' AND is_approved = 0';
     } else if (status === 'approved') {
-      countQuery += " AND approval_status = 'approved'";
+      countQuery += ' AND is_approved = 1';
     }
 
     const countRes = await db.execute({ sql: countQuery, args: countParams });

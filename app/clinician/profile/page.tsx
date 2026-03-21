@@ -7,7 +7,7 @@ import { DashboardShell } from '@/components/dashboard/dashboard-shell';
 import { Button } from '@/components/ui/button';
 import { Star } from 'lucide-react';
 
-interface ClinicianProfile {
+interface therapistProfile {
   id: number;
   user_id: number;
   full_name: string;
@@ -79,10 +79,10 @@ const language_options = [
   'Korean',
 ];
 
-export default function ClinicianProfilePage() {
+export default function therapistProfilePage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
-  const [profile, setProfile] = useState<ClinicianProfile | null>(null);
+  const [profile, setProfile] = useState<therapistProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -100,7 +100,7 @@ export default function ClinicianProfilePage() {
 
   useEffect(() => {
     if (!authLoading) {
-      if (!user || (user.role !== 'clinician' && user.role !== 'therapist')) {
+      if (!user || user.role !== 'therapist') {
         router.push('/login?redirect=/clinician/profile');
         return;
       }
@@ -211,7 +211,7 @@ export default function ClinicianProfilePage() {
       <DashboardShell
         title="Loading..."
         subtitle="Please wait"
-        breadcrumbs={[{ label: 'Clinician', href: '/clinician' }, { label: 'Profile' }]}
+        breadcrumbs={[{ label: 'therapist', href: '/clinician' }, { label: 'Profile' }]}
         navItems={[]}
       >
         <div className="flex items-center justify-center py-12">
@@ -226,7 +226,7 @@ export default function ClinicianProfilePage() {
       <DashboardShell
         title="Profile Not Found"
         subtitle="Unable to load your profile"
-        breadcrumbs={[{ label: 'Clinician', href: '/clinician' }, { label: 'Profile' }]}
+        breadcrumbs={[{ label: 'therapist', href: '/clinician' }, { label: 'Profile' }]}
         navItems={[]}
       >
         <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-center">
@@ -243,10 +243,10 @@ export default function ClinicianProfilePage() {
     <DashboardShell
       title="My Professional Profile"
       subtitle="Manage your therapy practice profile"
-      breadcrumbs={[{ label: 'Clinician', href: '/clinician' }, { label: 'Profile' }]}
+      breadcrumbs={[{ label: 'therapist', href: '/clinician' }, { label: 'Profile' }]}
       navItems={[
         { label: 'Dashboard', href: '/clinician', icon: 'Home' },
-        { label: 'My Patients', href: '/clinician/patients', icon: 'Users' },
+        { label: 'My Patients', href: '/clinician/sessions', icon: 'Users' },
         { label: 'Schedule', href: '/clinician/schedule', icon: 'Calendar' },
       ]}
     >

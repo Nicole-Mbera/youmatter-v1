@@ -115,7 +115,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
     });
   }
 
-  // If this was a teacher subscription
+  // If this was a therapist subscription
   if (type === 'subscription' && userId) {
     console.log(`Processing subscription activation for user ${userId}`);
     // 30 days from now

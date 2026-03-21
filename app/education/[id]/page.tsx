@@ -187,7 +187,7 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
           <div className="bg-[black] text-white rounded-lg p-8">
             <h3 className="text-2xl font-bold mb-3">Need Support?</h3>
             <p className="text-gray-200 mb-6">
-              Connect with qualified Educators through AEON
+              Connect with qualified Educators through youmatter
             </p>
             <a
               href="/login"

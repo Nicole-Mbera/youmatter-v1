@@ -42,12 +42,19 @@ CREATE TABLE IF NOT EXISTS therapists (
     phone TEXT,
     country TEXT,
     institution_name TEXT,
+    contact_email TEXT,
+    credentials TEXT,
+    specializations_json TEXT,
+    therapy_types_json TEXT,
+    languages_json TEXT,
+    session_price INTEGER,
     mission TEXT,
     profile_picture TEXT,
     consultation_fee REAL DEFAULT 80.0,
     average_rating REAL DEFAULT 0.0,
     total_reviews INTEGER DEFAULT 0,
     is_verified BOOLEAN DEFAULT 0,
+    stripe_account_id TEXT,
     verification_status TEXT CHECK(verification_status IN ('pending', 'approved', 'rejected')) DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -88,6 +95,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     session_type TEXT CHECK(session_type IN ('video', 'chat', 'phone')),
     status TEXT CHECK(status IN ('scheduled', 'completed', 'cancelled', 'no_show')) DEFAULT 'scheduled',
     notes TEXT,
+    meeting_link TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
@@ -179,6 +187,28 @@ CREATE TABLE IF NOT EXISTS password_resets (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Admins (for users with role='admin')
+CREATE TABLE IF NOT EXISTS admins (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER UNIQUE NOT NULL,
+    full_name TEXT NOT NULL,
+    phone TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- User activity log
+CREATE TABLE IF NOT EXISTS user_activity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    activity_type TEXT NOT NULL,
+    details TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_user_activity_user_id ON user_activity(user_id);
+
 -- Donations
 CREATE TABLE IF NOT EXISTS donations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -205,3 +235,31 @@ CREATE INDEX idx_sessions_date ON sessions(scheduled_date);
 CREATE INDEX idx_payments_status ON payments(status);
 CREATE INDEX idx_reviews_therapist ON session_reviews(therapist_id);
 CREATE INDEX idx_bookmarks_patient ON bookmarks(patient_id);
+
+-- Messaging
+CREATE TABLE IF NOT EXISTS conversations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    patient_id INTEGER NOT NULL,
+    therapist_id INTEGER NOT NULL,
+    last_message_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(patient_id, therapist_id),
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (therapist_id) REFERENCES therapists(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    conversation_id INTEGER NOT NULL,
+    sender_user_id INTEGER NOT NULL,
+    content TEXT NOT NULL,
+    is_read INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_messages_conversation ON messages(conversation_id);
+CREATE INDEX idx_messages_sender ON messages(sender_user_id);
+CREATE INDEX idx_conversations_patient ON conversations(patient_id);
+CREATE INDEX idx_conversations_therapist ON conversations(therapist_id);

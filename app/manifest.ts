@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'AEON Academy',
-        short_name: 'AEON',
+        name: 'youmatter Academy',
+        short_name: 'youmatter',
         description: 'Premier English Learning Platform',
         start_url: '/',
         display: 'standalone',

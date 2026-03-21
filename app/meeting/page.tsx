@@ -37,7 +37,7 @@ function MeetingContent() {
       // Determine API endpoint based on user role
       const endpoint = user?.role === 'patient' 
         ? '/api/patient/sessions'
-        : '/api/therapist/sessions';
+        : '/api/clinician/sessions';
 
       const response = await fetch(endpoint);
       if (!response.ok) throw new Error('Failed to fetch session');
@@ -88,10 +88,10 @@ function MeetingContent() {
 
   const handleMeetingEnd = () => {
     // Redirect back to dashboard
-    if (user?.role === 'student') {
-      router.push('/user');
-    } else if (user?.role === 'teacher') {
-      router.push('/doctor');
+    if (user?.role === 'patient') {
+      router.push('/patient');
+    } else if (user?.role === 'therapist') {
+      router.push('/clinician');
     }
   };
 
@@ -128,9 +128,9 @@ function MeetingContent() {
     return null;
   }
 
-  const displayName = user?.role === 'student'
+  const displayName = user?.role === 'patient'
     ? consultation.patient_name || user?.email
-    : consultation.professional_name || user?.email;
+    : consultation.therapist_name || consultation.professional_name || user?.email;
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -139,8 +139,8 @@ function MeetingContent() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold text-white">
-              {user?.role === 'student' 
-                ? `Session with ${consultation.professional_name}`
+              {user?.role === 'patient' 
+                ? `Session with ${consultation.therapist_name || consultation.professional_name}`
                 : `Session with ${consultation.patient_name}`
               }
             </h1>

@@ -19,69 +19,31 @@ export const FONT_FAMILY = {
 
 // Platform information
 export const PLATFORM = {
-  name: "AEON",
-  tagline: "Transform Your Learning Journey",
-  description: "Connect with expert teachers for personalized education. Master new skills, achieve your goals, and unlock your potential.",
+  name: "YouMatter",
+  tagline: "You don't have to heal alone",
+  description: "Connecting you with compassionate therapists for personalized mental health support. Your journey to wellness starts here.",
 } as const;
 
 // User roles
 export const ROLES = {
-  STUDENT: 'student',
-  TEACHER: 'teacher',
-  ADMIN: 'admin',
+  patient: 'patient',
+  therapist: 'therapist',
+  admin: 'admin',
 } as const;
 
-// English proficiency levels
-export const ENGLISH_LEVELS = [
-  'beginner',
-  'elementary',
-  'intermediate',
-  'upper-intermediate',
-  'advanced',
-  'proficient'
-] as const;
-
-// Lesson categories
-export const LESSON_CATEGORIES = [
-  'General English',
-  'Business English',
-  'Academic English',
-  'Conversation Practice',
-  'Grammar',
-  'Pronunciation',
-  'Writing',
-  'Reading Comprehension',
-  'Test Preparation (IELTS/TOEFL)',
-  'Interview Preparation',
-] as const;
-
-// Resource categories
-export const RESOURCE_CATEGORIES = [
-  'Grammar Lessons',
-  'Vocabulary Building',
-  'Pronunciation Guides',
-  'Reading Materials',
-  'Writing Tips',
-  'Listening Practice',
-  'Speaking Exercises',
-  'Test Prep Resources',
-  'Cultural Insights',
-  'Study Tips',
-] as const;
-
 export const SOCIAL_LINKS = [
-  { name: "X", href: "https://twitter.com/aeonlearning" },
-  { name: "Instagram", href: "https://instagram.com/aeonlearning" },
-  { name: "YouTube", href: "https://youtube.com/@aeonlearning" },
-  { name: "LinkedIn", href: "https://linkedin.com/company/aeon-learning" },
+  { name: 'X', href: 'https://x.com/youmatter' },
+  { name: 'Instagram', href: 'https://instagram.com/youmatter' },
+  { name: 'LinkedIn', href: 'https://linkedin.com/company/youmatter' },
 ] as const;
+
+
+
 
 export const NAV_LINKS = [
   { label: "Features", href: "#features" },
   { label: "About", href: "#why" },
   { label: "Testimonials", href: "#community" },
-  { label: "Library", href: "/resourceHub" },
-  { label: "Teachers", href: "/teachers" },
   { label: "Login", href: "/login" },
 ] as const;
 

@@ -5,18 +5,15 @@ import { jwtVerify } from 'jose';
 // protection mapping
 const protectedRoutes = {
   '/admin': ['admin'],
-  '/teacher': ['teacher'],
-  '/student': ['student'],
-  '/subscription': ['student', 'teacher'],
   '/patient': ['patient'],
   '/clinician': ['therapist'],
 };
 
 // routes with authentication
-const authRequiredRoutes = ['/admin', '/teacher', '/student', '/subscription', '/patient', '/clinician'];
+const authRequiredRoutes = ['/admin', '/patient', '/clinician'];
 
 // routes with no authentication
-const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/education', '/testimonials', '/api-docs', '/api', '/donate', '/teachers', '/patient/find-therapist', '/patient/clinician', '/patient/book-session'];
+const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/education', '/testimonials', '/api-docs', '/api', '/donate', '/patient/find-therapist', '/patient/clinician', '/patient/book-session'];
 
 // Enforce JWT_SECRET in production
 if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
@@ -45,7 +42,6 @@ export async function middleware(request: NextRequest) {
     pathname === '/testimonials' ||
     pathname === '/api-docs' ||
     pathname === '/donate' ||
-    pathname === '/teachers' ||
     pathname.startsWith('/patient/find-therapist') ||
     pathname.startsWith('/patient/clinician') ||
     pathname.startsWith('/patient/book-session');
@@ -77,29 +73,7 @@ export async function middleware(request: NextRequest) {
 
       const isVerified = payload.is_verified as number ?? 0;
 
-      // Special check for teacher subscription and verification
-      if (userRole === 'teacher' && pathname.startsWith('/teacher')) {
-        // If teacher account is not verified yet
-        if (!isVerified) {
-          if (pathname !== '/teacher/pending') {
-            return NextResponse.redirect(new URL('/teacher/pending', request.url));
-          }
-        }
-        // If teacher is verified
-        else {
-          // If trying to access pending page but are verified, redirect to dashboard
-          if (pathname === '/teacher/pending') {
-            return NextResponse.redirect(new URL('/teacher', request.url));
-          }
-
-          // If teacher is verified but subscription is not active
-          if (subscriptionStatus !== 'active') {
-            return NextResponse.redirect(new URL('/subscription/teacher', request.url));
-          }
-        }
-      }
-
-      // Special check for therapist (clinician) verification
+      // Special check for therapist verification
       if (userRole === 'therapist' && pathname.startsWith('/clinician')) {
         // If therapist account is not verified yet
         if (!isVerified) {
@@ -119,8 +93,6 @@ export async function middleware(request: NextRequest) {
           // unauthorized - redirect to their appropriate dashboard
           const roleRedirectMap: Record<string, string> = {
             'admin': '/admin',
-            'teacher': '/teacher',
-            'student': '/student',
             'patient': '/patient',
             'therapist': '/clinician',
           };

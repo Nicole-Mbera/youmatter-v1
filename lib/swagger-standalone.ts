@@ -11,12 +11,12 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'AEON API Documentation',
+      title: 'youmatter API Documentation',
       version: '1.0.0',
-      description: 'Comprehensive REST API documentation for AEON English Learning Platform',
+      description: 'Comprehensive REST API documentation for youmatter English Learning Platform',
       contact: {
-        name: 'AEON Support',
-        email: 'support@aeon.com',
+        name: 'youmatter Support',
+        email: 'support@youmatter.com',
       },
       license: {
         name: 'MIT',
@@ -29,7 +29,7 @@ const options: swaggerJsdoc.Options = {
         description: 'Development server',
       },
       {
-        url: 'https://aeon.vercel.app',
+        url: 'https://youmatter.vercel.app',
         description: 'Production server',
       },
     ],
@@ -39,12 +39,12 @@ const options: swaggerJsdoc.Options = {
         description: 'User authentication and authorization endpoints',
       },
       {
-        name: 'Students',
-        description: 'Student-specific endpoints for booking lessons and managing profile',
+        name: 'patients',
+        description: 'patient-specific endpoints for booking lessons and managing profile',
       },
       {
-        name: 'Teachers',
-        description: 'Teacher endpoints for managing lessons, availability, and profile',
+        name: 'therapists',
+        description: 'therapist endpoints for managing lessons, availability, and profile',
       },
       {
         name: 'Lessons',
@@ -56,7 +56,7 @@ const options: swaggerJsdoc.Options = {
       },
       {
         name: 'Reviews',
-        description: 'Teacher reviews and ratings',
+        description: 'therapist reviews and ratings',
       },
       {
         name: 'Users',
@@ -88,13 +88,13 @@ const options: swaggerJsdoc.Options = {
             email: { type: 'string', format: 'email' },
             role: { 
               type: 'string', 
-              enum: ['student', 'teacher', 'admin'] 
+              enum: ['patient', 'therapist', 'admin'] 
             },
             is_verified: { type: 'boolean' },
             is_active: { type: 'boolean' },
           },
         },
-        Student: {
+        patient: {
           type: 'object',
           properties: {
             id: { type: 'integer' },
@@ -111,7 +111,7 @@ const options: swaggerJsdoc.Options = {
             learning_goals: { type: 'string' },
           },
         },
-        Teacher: {
+        therapist: {
           type: 'object',
           properties: {
             id: { type: 'integer' },
@@ -130,8 +130,8 @@ const options: swaggerJsdoc.Options = {
           type: 'object',
           properties: {
             id: { type: 'integer' },
-            student_id: { type: 'integer' },
-            teacher_id: { type: 'integer' },
+            patient_id: { type: 'integer' },
+            therapist_id: { type: 'integer' },
             scheduled_date: { type: 'string', format: 'date' },
             scheduled_time: { type: 'string' },
             duration_minutes: { type: 'integer' },
@@ -203,7 +203,7 @@ const htmlContent = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AEON API Documentation</title>
+  <title>youmatter API Documentation</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
   <style>
     body { margin: 0; padding: 0; }

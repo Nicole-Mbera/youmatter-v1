@@ -17,14 +17,14 @@ interface BookingPaymentModalProps {
     isOpen: boolean;
     onClose: () => void;
     amount: number;
-    teacherName: string;
-    teacherId: number;
+    therapistName: string;
+    therapistId: number;
     onSuccess: (paymentIntentId: string) => void;
 }
 
-function CheckoutForm({ amount, teacherName, clientSecret, onSuccess, onClose }: {
+function CheckoutForm({ amount, therapistName, clientSecret, onSuccess, onClose }: {
     amount: number;
-    teacherName: string;
+    therapistName: string;
     clientSecret: string;
     onSuccess: (id: string) => void;
     onClose: () => void;
@@ -55,7 +55,7 @@ function CheckoutForm({ amount, teacherName, clientSecret, onSuccess, onClose }:
                     card: cardElement,
                     billing_details: {
                         // In a real app, pre-fill from user context
-                        name: 'Student',
+                        name: 'patient',
                     },
                 },
             });
@@ -94,7 +94,7 @@ function CheckoutForm({ amount, teacherName, clientSecret, onSuccess, onClose }:
             <div className="text-center mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">Monthly Subscription</h3>
                 <p className="text-sm text-gray-500 mt-1">
-                    Pay <span className="font-bold text-gray-900">${(amount / 100).toFixed(2)}</span> to subscribe to {teacherName}.
+                    Pay <span className="font-bold text-gray-900">${(amount / 100).toFixed(2)}</span> to subscribe to {therapistName}.
                 </p>
             </div>
 
@@ -132,20 +132,20 @@ export function BookingPaymentModal({
     isOpen,
     onClose,
     amount,
-    teacherName,
-    teacherId,
+    therapistName,
+    therapistId,
     onSuccess
 }: BookingPaymentModalProps) {
     const [clientSecret, setClientSecret] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (isOpen && teacherId) {
+        if (isOpen && therapistId) {
             // Fetch payment intent
             fetch("/api/booking/payment-intent", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ teacherId }),
+                body: JSON.stringify({ therapistId }),
             })
                 .then(async (res) => {
                     const data = await res.json();
@@ -160,7 +160,7 @@ export function BookingPaymentModal({
                     console.error(err);
                 });
         }
-    }, [isOpen, teacherId]);
+    }, [isOpen, therapistId]);
 
     if (!isOpen) return null;
 
@@ -176,7 +176,7 @@ export function BookingPaymentModal({
                     <Elements stripe={stripePromise} options={{ clientSecret }}>
                         <CheckoutForm
                             amount={amount}
-                            teacherName={teacherName}
+                            therapistName={therapistName}
                             clientSecret={clientSecret}
                             onSuccess={onSuccess}
                             onClose={onClose}

@@ -4,7 +4,7 @@ import { Star, MapPin, Badge, Clock, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-interface ClinicianProfileCardProps {
+interface therapistProfileCardProps {
   id: number;
   full_name: string;
   specialization?: string; // single specialization from API
@@ -24,7 +24,7 @@ interface ClinicianProfileCardProps {
   is_verified?: boolean;
 }
 
-export function ClinicianProfileCard({
+export function therapistProfileCard({
   id,
   full_name,
   specialization,
@@ -41,7 +41,7 @@ export function ClinicianProfileCard({
   therapy_types = [],
   languages = ['English'],
   is_verified = false,
-}: ClinicianProfileCardProps) {
+}: therapistProfileCardProps) {
   const renderStars = (rating: number) => {
     return (
       <div className="flex items-center gap-1">
@@ -191,7 +191,7 @@ export function ClinicianProfileCard({
             View Profile
           </Button>
         </Link>
-        <Link href={`/patient/book-session?clinician_id=${id}`} className="flex-1">
+        <Link href={`/patient/book-session?therapist_id=${id}`} className="flex-1">
           <Button className="w-full bg-black hover:bg-gray-800 text-white rounded-2xl">
             Book Session
           </Button>

@@ -1,5 +1,4 @@
 import { createClient, Client } from '@libsql/client';
-import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -34,9 +33,6 @@ const client = {
 };
 
 export default client;
-
-// Helper to handle both LibSQL and local file URL differences in returned structure if necessary
-// But standard client.execute returns { rows: [], columns: [] }
 
 // --- User Queries ---
 export const userQueries = {
@@ -96,7 +92,7 @@ export const patientQueries = {
   getPatientByUserId: async (userId: number | string) => {
     const rs = await client.execute({
       sql: `SELECT p.*, u.email, u.is_verified, u.is_active, u.created_at
-            FROM students p
+            FROM patients p
             JOIN users u ON p.user_id = u.id
             WHERE p.user_id = ?`,
       args: [userId]
@@ -107,7 +103,7 @@ export const patientQueries = {
   getPatientByUsername: async (username: string) => {
     const rs = await client.execute({
       sql: `SELECT p.*, u.email, u.is_verified, u.is_active, u.created_at
-            FROM students p
+            FROM patients p
             JOIN users u ON p.user_id = u.id
             WHERE p.username = ?`,
       args: [username]
@@ -120,14 +116,14 @@ export const patientQueries = {
     username: string,
     fullName: string | null,
     dob: string | null,
-    gradeLevel: string | null,
+    gender: string | null,
     phone: string | null,
     profilePicture: string | null
   ) => {
     return await client.execute({
-      sql: `INSERT INTO students (user_id, username, full_name, date_of_birth, grade_level, phone, profile_picture)
+      sql: `INSERT INTO patients (user_id, username, full_name, date_of_birth, gender, phone, profile_picture)
             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      args: [userId, username, fullName, dob, gradeLevel, phone, profilePicture]
+      args: [userId, username, fullName || username, dob, gender, phone, profilePicture]
     });
   },
 
@@ -135,50 +131,62 @@ export const patientQueries = {
     username: string,
     fullName: string | null,
     dob: string | null,
-    gradeLevel: string | null,
+    gender: string | null,
     phone: string | null,
     profilePicture: string | null,
+    bio: string | null,
     userId: number | string
   ) => {
     return await client.execute({
-      sql: `UPDATE students 
-            SET username = ?, full_name = ?, date_of_birth = ?, grade_level = ?, phone = ?, profile_picture = ?
+      sql: `UPDATE patients
+            SET username = ?, full_name = ?, date_of_birth = ?, gender = ?, phone = ?, profile_picture = ?, bio = ?, updated_at = CURRENT_TIMESTAMP
             WHERE user_id = ?`,
-      args: [username, fullName, dob, gradeLevel, phone, profilePicture, userId]
+      args: [username, fullName, dob, gender, phone, profilePicture, bio, userId]
     });
   },
 
   checkUsernameAvailable: async (username: string) => {
-    const rs = await client.execute({ sql: 'SELECT id FROM students WHERE username = ?', args: [username] });
+    const rs = await client.execute({ sql: 'SELECT id FROM patients WHERE username = ?', args: [username] });
     return rs.rows[0];
   },
 };
 
-// --- Professional (Teacher) Queries ---
-export const professionalQueries = {
-  getProfessionalByUserId: async (userId: number | string) => {
+// --- Therapist Queries ---
+export const therapistQueries = {
+  getTherapistByUserId: async (userId: number | string) => {
     const rs = await client.execute({
-      sql: `SELECT hp.*, u.email, u.is_verified, u.is_active
-            FROM teachers hp
-            JOIN users u ON hp.user_id = u.id
-            WHERE hp.user_id = ?`,
+      sql: `SELECT t.*, u.email, u.is_verified, u.is_active
+            FROM therapists t
+            JOIN users u ON t.user_id = u.id
+            WHERE t.user_id = ?`,
       args: [userId]
     });
     return rs.rows[0];
   },
 
-  getAllProfessionals: async () => {
+  getTherapistById: async (id: number | string) => {
     const rs = await client.execute({
-      sql: `SELECT hp.*, u.email
-            FROM teachers hp
-            JOIN users u ON hp.user_id = u.id
-            ORDER BY hp.full_name`,
+      sql: `SELECT t.*, u.email
+            FROM therapists t
+            JOIN users u ON t.user_id = u.id
+            WHERE t.id = ?`,
+      args: [id]
+    });
+    return rs.rows[0];
+  },
+
+  getAllTherapists: async () => {
+    const rs = await client.execute({
+      sql: `SELECT t.*, u.email
+            FROM therapists t
+            JOIN users u ON t.user_id = u.id
+            ORDER BY t.full_name`,
       args: []
     });
     return rs.rows;
   },
 
-  createProfessional: async (
+  createTherapist: async (
     userId: number | string,
     fullName: string,
     bio: string | null,
@@ -190,20 +198,19 @@ export const professionalQueries = {
     institutionName: string | null,
     country: string | null,
     contactEmail: string | null,
-    mission: string | null,
-    documents: string | null
+    mission: string | null
   ) => {
     return await client.execute({
-      sql: `INSERT INTO teachers (user_id, full_name, bio, specialization, years_of_experience, phone, profile_picture, license_number, institution_name, country, contact_email, mission, documents, monthly_fee)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      sql: `INSERT INTO therapists (user_id, full_name, bio, specialization, years_of_experience, phone, profile_picture, license_number, institution_name, country, contact_email, mission)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         userId, fullName, bio, specialization, yearsOfExperience, phone, profilePicture,
-        licenseNumber, institutionName, country, contactEmail, mission, documents, 6000
+        licenseNumber, institutionName, country, contactEmail, mission
       ]
     });
   },
 
-  updateProfessional: async (
+  updateTherapist: async (
     fullName: string,
     bio: string | null,
     specialization: string | null,
@@ -213,24 +220,16 @@ export const professionalQueries = {
     userId: number | string
   ) => {
     return await client.execute({
-      sql: `UPDATE teachers 
+      sql: `UPDATE therapists 
             SET full_name = ?, bio = ?, specialization = ?, years_of_experience = ?, phone = ?, profile_picture = ?
             WHERE user_id = ?`,
       args: [fullName, bio, specialization, yearsOfExperience, phone, profilePicture, userId]
     });
   },
-
-  getProfessionalsByInstitution: async () => {
-    const rs = await client.execute({
-      sql: `SELECT hp.*, u.email
-            FROM teachers hp
-            JOIN users u ON hp.user_id = u.id
-            WHERE 1=1`,
-      args: []
-    });
-    return rs.rows;
-  },
 };
+
+// Backward compatibility alias
+export const professionalQueries = therapistQueries;
 
 // --- Institutional Admin Queries (Deprecated) ---
 export const institutionalAdminQueries = {
@@ -243,10 +242,10 @@ export const institutionalAdminQueries = {
 export const systemAdminQueries = {
   getAdminByUserId: async (userId: number | string) => {
     const rs = await client.execute({
-      sql: `SELECT sa.*, u.email
-            FROM admins sa
-            JOIN users u ON sa.user_id = u.id
-            WHERE sa.user_id = ?`,
+      sql: `SELECT a.*, u.email
+            FROM admins a
+            JOIN users u ON a.user_id = u.id
+            WHERE a.user_id = ?`,
       args: [userId]
     });
     return rs.rows[0];
@@ -262,9 +261,9 @@ export const systemAdminQueries = {
 
   getAllSystemAdmins: async () => {
     const rs = await client.execute({
-      sql: `SELECT sa.*, u.email, u.is_active
-            FROM admins sa
-            JOIN users u ON sa.user_id = u.id`,
+      sql: `SELECT a.*, u.email, u.is_active
+            FROM admins a
+            JOIN users u ON a.user_id = u.id`,
       args: []
     });
     return rs.rows;
@@ -309,13 +308,6 @@ export const activityQueries = {
   },
 };
 
-// --- Initialization Logic (kept for local/manual init) ---
-// Note: LibSQL doesn't verify schema automatically in the same way, 
-// usually you run migrations externally. But we can keep a helper.
-
 export async function initializeDatabase() {
-  // This function is less relevant for LibSQL in serverless,
-  // usually you migrate your DB once.
-  // For local dev with file: protocol, we could still execute schema.
   console.warn("initializeDatabase called - manual migration recommended for Turso/LibSQL");
 }

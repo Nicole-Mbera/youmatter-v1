@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { SOCIAL_LINKS } from "@/lib/constants";
 import {
   RiTwitterXLine,
@@ -15,7 +14,7 @@ const columns = [
       { name: "About Us", href: "/#about" },
       { name: "How It Works", href: "/#features" },
       { name: "Success Stories", href: "/testimonials" },
-      { name: "Resources", href: "/resourceHub" },
+      { name: "Testimonials", href: "/testimonials" },
     ],
   },
   {
@@ -41,18 +40,13 @@ export function Footer() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-16 md:flex-row md:items-start md:justify-between">
         <div className="space-y-6 max-w-xs">
           <div className="flex items-center gap-3 text-lg font-semibold">
-            <div className="relative h-30 w-30 overflow-hidden rounded-full">
-              <Image
-                src="/uploads/logo.jpeg"
-                alt="You Matter Logo"
-                fill
-                className="object-cover"
-              />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm">UM</span>
             </div>
             You Matter
           </div>
           <div className="flex items-center gap-4 text-sm text-white/80">
-            {SOCIAL_LINKS.map((link) => {
+            {SOCIAL_LINKS.map((link: { name: string; href: string }) => {
               const Icon =
                 socialIcons[link.name as keyof typeof socialIcons];
               return (

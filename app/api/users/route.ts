@@ -31,15 +31,15 @@ export async function GET(request: Request) {
     }
 
     // Get counts by role
-    const [patientCount, teacherCount, adminCount] = await Promise.all([
+    const [patientCount, therapistCount, adminCount] = await Promise.all([
       userQueries.countUsersByRole('patient'),
-      userQueries.countUsersByRole('teacher'),
+      userQueries.countUsersByRole('therapist'),
       userQueries.countUsersByRole('admin')
     ]);
 
     const counts = {
       patient: (patientCount as any).count,
-      teacher: (teacherCount as any).count,
+      therapist: (therapistCount as any).count,
       admin: (adminCount as any).count,
     };
 

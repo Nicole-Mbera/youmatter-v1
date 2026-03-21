@@ -17,7 +17,7 @@ function initializeSendGrid() {
 // Get default from address (lazy evaluation)
 function getDefaultFrom() {
   return {
-    email: process.env.SENDGRID_FROM_EMAIL || 'noreply@aeon.com',
+    email: process.env.SENDGRID_FROM_EMAIL || 'noreply@youmatter.com',
     name: process.env.SENDGRID_FROM_NAME || 'You Matter',
   };
 }
@@ -25,13 +25,13 @@ function getDefaultFrom() {
 // Email templates (for when not using SendGrid dynamic templates)
 export const emailTemplates = {
   confirmation: (data: {
-    studentName: string;
+    patientName: string;
     mentorName: string;
     date: string;
     time: string;
     meetingLink: string;
   }) => ({
-    subject: 'Session confirmed - AEON',
+    subject: 'Session confirmed - youmatter',
     html: `
       <!DOCTYPE html>
       <html>
@@ -61,7 +61,7 @@ export const emailTemplates = {
             <h1>Study Session Confirmed</h1>
           </div>
           <div class="content">
-            <p>Dear ${data.studentName},</p>
+            <p>Dear ${data.patientName},</p>
             <p>Your study session has been successfully booked.</p>
             
             <div class="details">
@@ -87,7 +87,7 @@ export const emailTemplates = {
             </div>
           </div>
           <div class="footer">
-            <p>© 2025 AEON. Level up your academic journey, one session at a time.</p>
+            <p>© 2025 youmatter. Level up your academic journey, one session at a time.</p>
           </div>
         </div>
       </body>
@@ -96,13 +96,13 @@ export const emailTemplates = {
   }),
 
   reminder24h: (data: {
-    studentName: string;
+    patientName: string;
     mentorName: string;
     date: string;
     time: string;
     meetingLink: string;
   }) => ({
-    subject: 'Reminder: Study Session Tomorrow - AEON',
+    subject: 'Reminder: Study Session Tomorrow - youmatter',
     html: `
       <!DOCTYPE html>
       <html>
@@ -131,7 +131,7 @@ export const emailTemplates = {
             <h1>Study Session Tomorrow</h1>
           </div>
           <div class="content">
-            <p>Hello ${data.studentName},</p>
+            <p>Hello ${data.patientName},</p>
             <p>This is a friendly reminder that you have a study session scheduled tomorrow.</p>
             
             <div class="details">
@@ -153,7 +153,7 @@ export const emailTemplates = {
             <p style="margin-top: 25px; color: #666; font-size: 14px;">Please make sure you're available at the scheduled time. If you need to cancel, please do so at least 6 hours in advance.</p>
           </div>
           <div class="footer">
-            <p>© 2025 AEON. Level up your academic journey, one session at a time.</p>
+            <p>© 2025 youmatter. Level up your academic journey, one session at a time.</p>
           </div>
         </div>
       </body>
@@ -162,12 +162,12 @@ export const emailTemplates = {
   }),
 
   reminder1h: (data: {
-    studentName: string;
+    patientName: string;
     mentorName: string;
     time: string;
     meetingLink: string;
   }) => ({
-    subject: 'Study Session Starting Soon - AEON',
+    subject: 'Study Session Starting Soon - youmatter',
     html: `
       <!DOCTYPE html>
       <html>
@@ -200,7 +200,7 @@ export const emailTemplates = {
               Your study session with ${data.mentorName} starts at ${data.time}
             </div>
             
-            <p>Hello ${data.studentName},</p>
+            <p>Hello ${data.patientName},</p>
             <p>Your study session is starting in 1 hour. Please make sure you're ready to join.</p>
             
             <center>
@@ -212,7 +212,7 @@ export const emailTemplates = {
             </div>
           </div>
           <div class="footer">
-            <p>© 2025 AEON. Level up your academic journey, one session at a time.</p>
+            <p>© 2025 youmatter. Level up your academic journey, one session at a time.</p>
           </div>
         </div>
       </body>
@@ -227,7 +227,7 @@ export const emailTemplates = {
     message?: string;
     acceptLink: string;
   }) => ({
-    subject: `${data.senderName} invited you to a study session - AEON`,
+    subject: `${data.senderName} invited you to a study session - youmatter`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -266,11 +266,11 @@ export const emailTemplates = {
             </center>
             
             <p style="color: #666; font-size: 13px; margin-top: 30px;">
-              This invitation was sent by ${data.senderName} through AEON.Academy.
+              This invitation was sent by ${data.senderName} through youmatter.Academy.
             </p>
           </div>
           <div class="footer">
-            <p>© 2025 AEON. Level up your academic journey, one session at a time.</p>
+            <p>© 2025 youmatter. Level up your academic journey, one session at a time.</p>
           </div>
         </div>
       </body>
@@ -415,7 +415,7 @@ export async function sendInstitutionApprovalEmail(data: {
           
           <div class="success-badge">Verification Complete</div>
           
-          <p>We are thrilled to inform you that <strong>${data.institutionName}</strong> has been successfully verified and approved as an AEON partner institution!</p>
+          <p>We are thrilled to inform you that <strong>${data.institutionName}</strong> has been successfully verified and approved as an youmatter partner institution!</p>
           
           <p>Your commitment to supporting African youth education aligns perfectly with our mission, and we look forward to making a meaningful impact together.</p>
           
@@ -437,15 +437,15 @@ export async function sendInstitutionApprovalEmail(data: {
           
           <p>If you have any questions or need assistance getting started, our support team is here to help.</p>
           
-          <p>Welcome to the AEON family!</p>
+          <p>Welcome to the youmatter family!</p>
           
           <p style="margin-top: 30px;">
             Warm regards,<br>
-            <strong>The AEON Team</strong>
+            <strong>The youmatter Team</strong>
           </p>
         </div>
         <div class="footer">
-          <p>© 2025 AEON. Level up your academic journey, one session at a time.</p>
+          <p>© 2025 youmatter. Level up your academic journey, one session at a time.</p>
         </div>
       </div>
     </body>
@@ -456,7 +456,7 @@ export async function sendInstitutionApprovalEmail(data: {
     await sendgrid.send({
       to: data.to,
       from,
-      subject: `Partnership Approved - Welcome to AEON!`,
+      subject: `Partnership Approved - Welcome to youmatter!`,
       html: htmlContent,
     });
 
@@ -506,7 +506,7 @@ export async function sendInstitutionRejectionEmail(data: {
         <div class="content">
           <p>Dear ${data.adminName},</p>
           
-          <p>Thank you for your interest in partnering with AEON.Academy and your commitment to supporting youth education.</p>
+          <p>Thank you for your interest in partnering with youmatter.Academy and your commitment to supporting youth education.</p>
           
           <p>After careful review, we regret to inform you that we are unable to approve <strong>${data.institutionName}</strong>'s partnership application at this time.</p>
           
@@ -520,18 +520,18 @@ export async function sendInstitutionRejectionEmail(data: {
           <p>If you have questions about this decision or need clarification on the requirements, please don't hesitate to reach out to our support team.</p>
           
           <center>
-            <a href="mailto:support@aeon.com" class="button">
+            <a href="mailto:support@youmatter.com" class="button">
               Contact Support
             </a>
           </center>
           
           <p style="margin-top: 30px;">
             Best regards,<br>
-            <strong>The AEON Team</strong>
+            <strong>The youmatter Team</strong>
           </p>
         </div>
         <div class="footer">
-          <p>© 2025 AEON. Level up your academic journey, one session at a time.</p>
+          <p>© 2025 youmatter. Level up your academic journey, one session at a time.</p>
         </div>
       </div>
     </body>
@@ -542,7 +542,7 @@ export async function sendInstitutionRejectionEmail(data: {
     await sendgrid.send({
       to: data.to,
       from,
-      subject: `Partnership Application Update - AEON`,
+      subject: `Partnership Application Update - youmatter`,
       html: htmlContent,
     });
 
@@ -587,7 +587,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
         </div>
         <div class="content">
           <p>Hello,</p>
-          <p>We received a request to reset your password for your AEON.Academy account.</p>
+          <p>We received a request to reset your password for your youmatter.Academy account.</p>
           <p>Click the button below to set a new password:</p>
           
           <center>
@@ -597,7 +597,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
           <p>If you didn't request this, you can safely ignore this email. This link will expire in 1 hour.</p>
         </div>
         <div class="footer">
-          <p>© 2025 AEON. Level up your academic journey, one session at a time.</p>
+          <p>© 2025 youmatter. Level up your academic journey, one session at a time.</p>
         </div>
       </div>
     </body>
@@ -608,7 +608,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
     await sendgrid.send({
       to: email,
       from,
-      subject: 'Reset your password - AEON',
+      subject: 'Reset your password - youmatter',
       html: htmlContent,
     });
 
@@ -635,11 +635,11 @@ export async function verifyEmailConnection(): Promise<boolean> {
 }
 
 /**
- * Send teacher approval email
+ * Send therapist approval email
  */
-export async function sendTeacherApprovalEmail(data: {
+export async function sendtherapistApprovalEmail(data: {
   to: string;
-  teacherName: string;
+  therapistName: string;
 }) {
   if (!initializeSendGrid()) {
     console.warn('SendGrid not configured, skipping email');
@@ -647,7 +647,7 @@ export async function sendTeacherApprovalEmail(data: {
   }
 
   const from = getDefaultFrom();
-  const subscriptionLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/subscription/teacher`;
+  const dashboardLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/login?redirect=/clinician`;
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -656,43 +656,43 @@ export async function sendTeacherApprovalEmail(data: {
       <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #1a1a1a; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f8f9fa; }
-        .header { background: linear-gradient(to right, #fafafa, #f0f0f0, #fafafa); color: #1a1a1a; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0; border-bottom: 3px solid #404040; }
+        .header { background: linear-gradient(135deg, #16a34a, #15803d); color: white; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0; }
         .header h1 { margin: 0; font-size: 28px; font-weight: 600; }
         .content { background: white; padding: 40px 30px; border-radius: 0 0 12px 12px; }
         .success-badge { background: #10b981; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; margin: 20px 0; font-weight: 600; }
-        .button { display: inline-block; background: #404040; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; margin: 25px 0; font-weight: 600; }
+        .button { display: inline-block; background: #16a34a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; margin: 25px 0; font-weight: 600; }
         .footer { text-align: center; margin-top: 30px; color: #666; font-size: 13px; padding: 20px; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <h1>Welcome to AEON Faculty!</h1>
+          <h1>You're Approved — Welcome to You Matter!</h1>
         </div>
         <div class="content">
-          <p>Dear ${data.teacherName},</p>
-          
-          <div class="success-badge">Application Approved</div>
-          
-          <p>Congratulations! Your application to join AEON.Academy as a teacher has been approved.</p>
-          
-          <p>To active your account and start teaching, please complete your subscription setup.</p>
-          
+          <p>Dear ${data.therapistName},</p>
+
+          <div class="success-badge">✓ Application Approved</div>
+
+          <p>Congratulations! Your application to join <strong>You Matter</strong> as a licensed therapist has been reviewed and approved.</p>
+
+          <p>You can now log in to your dashboard to set your availability, complete your profile, and start accepting patients.</p>
+
           <center>
-            <a href="${subscriptionLink}" class="button">
-              Activate Account
+            <a href="${dashboardLink}" class="button">
+              Go to My Dashboard
             </a>
           </center>
-          
+
           <p>If you have any questions as you get started, please don't hesitate to reach out to our support team.</p>
-          
+
           <p style="margin-top: 30px;">
             Warm regards,<br>
-            <strong>The AEON Team</strong>
+            <strong>The You Matter Team</strong>
           </p>
         </div>
         <div class="footer">
-          <p>© 2025 AEON. Level up your academic journey, one session at a time.</p>
+          <p>© 2025 You Matter. You don't have to heal alone.</p>
         </div>
       </div>
     </body>
@@ -703,7 +703,7 @@ export async function sendTeacherApprovalEmail(data: {
     await sendgrid.send({
       to: data.to,
       from,
-      subject: `Welcome to AEON! Application Approved`,
+      subject: `Welcome to youmatter! Application Approved`,
       html: htmlContent,
     });
 
@@ -715,11 +715,11 @@ export async function sendTeacherApprovalEmail(data: {
 }
 
 /**
- * Send teacher rejection email
+ * Send therapist rejection email
  */
-export async function sendTeacherRejectionEmail(data: {
+export async function sendtherapistRejectionEmail(data: {
   to: string;
-  teacherName: string;
+  therapistName: string;
   reason: string;
 }) {
   if (!initializeSendGrid()) {
@@ -749,10 +749,10 @@ export async function sendTeacherRejectionEmail(data: {
           <h1>Application Update</h1>
         </div>
         <div class="content">
-          <p>Dear ${data.teacherName},</p>
+          <p>Dear ${data.therapistName},</p>
           
-          <p>Thank you for your interest in joining AEON.Academy as a teacher.</p>
-          
+          <p>Thank you for your interest in joining You Matter as a licensed therapist.</p>
+
           <p>After reviewing your application, we regret to inform you that we are unable to move forward with your registration at this time.</p>
           
           <div class="reason-box">
@@ -764,11 +764,11 @@ export async function sendTeacherRejectionEmail(data: {
           
           <p style="margin-top: 30px;">
             Best regards,<br>
-            <strong>The AEON Team</strong>
+            <strong>The youmatter Team</strong>
           </p>
         </div>
         <div class="footer">
-          <p>© 2025 AEON. Level up your academic journey, one session at a time.</p>
+          <p>© 2025 youmatter. Level up your academic journey, one session at a time.</p>
         </div>
       </div>
     </body>
@@ -779,7 +779,7 @@ export async function sendTeacherRejectionEmail(data: {
     await sendgrid.send({
       to: data.to,
       from,
-      subject: `AEON Application Update`,
+      subject: `youmatter Application Update`,
       html: htmlContent,
     });
 

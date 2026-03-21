@@ -1,7 +1,6 @@
 "use client";
 
 import { ReactNode } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
@@ -69,13 +68,8 @@ export function DashboardShell({
                 href="/"
                 className="flex items-center gap-3 text-sm font-semibold text-black"
               >
-                <div className="relative h-12 w-12 overflow-hidden rounded-full">
-                  <Image
-                    src="/uploads/logo.jpeg"
-                    alt="You Matter Logo"
-                    fill
-                    className="object-cover"
-                  />
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-xs">UM</span>
                 </div>
                 You Matter
               </Link>

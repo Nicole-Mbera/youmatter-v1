@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { NAV_LINKS } from "@/lib/constants";
@@ -20,13 +19,8 @@ export function Navbar() {
           href="/"
           className="flex items-center gap-3 text-base font-semibold tracking-tight"
         >
-          <div className="relative h-12 w-12 overflow-hidden rounded-full">
-            <Image
-              src="/uploads/logo.jpeg"
-              alt="You Matter Logo"
-              fill
-              className="object-cover"
-            />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center flex-shrink-0">
+            <span className="text-white font-bold text-sm">UM</span>
           </div>
           You Matter
         </Link>

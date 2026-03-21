@@ -9,7 +9,7 @@ const options: swaggerJsdoc.Options = {
       description: 'Comprehensive API documentation for BodyWise mental health platform',
       contact: {
         name: 'BodyWise Support',
-        email: 'a.niyonseng@alustudent.com',
+        email: 'a.niyonseng@alupatient.com',
       },
       license: {
         name: 'MIT',

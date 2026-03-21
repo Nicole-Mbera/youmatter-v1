@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://www.aeon-academy.com';
+    const baseUrl = 'https://www.youmatter-academy.com';
 
     return [
         {

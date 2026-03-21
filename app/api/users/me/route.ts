@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getUserFromRequest, hasAnyRole } from '@/lib/auth';
-import { userQueries, patientQueries, professionalQueries, institutionalAdminQueries, systemAdminQueries } from '@/lib/db';
+import { getUserFromRequest } from '@/lib/auth';
+import { userQueries, patientQueries, therapistQueries, systemAdminQueries } from '@/lib/db';
 
 export async function GET(request: Request) {
   try {
@@ -18,11 +18,11 @@ export async function GET(request: Request) {
     let profile = null;
 
     switch (currentUser.role) {
-      case 'student':
+      case 'patient':
         profile = await patientQueries.getPatientByUserId(currentUser.userId);
         break;
-      case 'teacher':
-        profile = await professionalQueries.getProfessionalByUserId(currentUser.userId);
+      case 'therapist':
+        profile = await therapistQueries.getTherapistByUserId(currentUser.userId);
         break;
       case 'admin':
         profile = await systemAdminQueries.getAdminByUserId(currentUser.userId);
@@ -77,33 +77,33 @@ export async function PUT(request: Request) {
 
     // Update based on role
     switch (currentUser.role) {
-      case 'student':
-        // Students can only update username
-        if (updates.username) {
-          // Check if username is available
-          const existing = await patientQueries.checkUsernameAvailable(updates.username) as any;
-          const currentProfile = await patientQueries.getPatientByUserId(currentUser.userId) as any;
+      case 'patient': {
+        const currentProfile = await patientQueries.getPatientByUserId(currentUser.userId) as any;
 
+        const newUsername = updates.username || currentProfile?.username;
+        if (updates.username && updates.username !== currentProfile?.username) {
+          const existing = await patientQueries.checkUsernameAvailable(updates.username) as any;
           if (existing && existing.id !== currentProfile?.id) {
             return NextResponse.json(
               { error: 'Username already taken' },
               { status: 409 }
             );
           }
-
-          await patientQueries.updatePatient(
-            updates.username,
-            currentProfile.full_name,
-            currentProfile.date_of_birth,
-            currentProfile.grade_level,
-            currentProfile.phone,
-            currentProfile.profile_picture,
-            currentUser.userId
-          );
         }
-        break;
 
-      // Add other role update logic here
+        await patientQueries.updatePatient(
+          newUsername,
+          updates.full_name !== undefined ? updates.full_name : currentProfile?.full_name ?? null,
+          updates.date_of_birth !== undefined ? updates.date_of_birth : currentProfile?.date_of_birth ?? null,
+          updates.gender !== undefined ? updates.gender : currentProfile?.gender ?? null,
+          updates.phone !== undefined ? updates.phone : currentProfile?.phone ?? null,
+          currentProfile?.profile_picture ?? null,
+          updates.bio !== undefined ? updates.bio : currentProfile?.bio ?? null,
+          currentUser.userId
+        );
+        break;
+      }
+
       default:
         return NextResponse.json(
           { error: 'Profile updates not implemented for this role' },

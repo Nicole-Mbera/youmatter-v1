@@ -42,7 +42,7 @@ export default function ApiDocsPage() {
             BodyWise API v1.0.0 • © 2025 BodyWise Health
           </p>
           <p className="text-sm text-[gray-300] mt-2">
-            For support, contact: a.niyonseng@alustudent.com
+            For support, contact: a.niyonseng@alupatient.com
           </p>
         </div>
       </div>

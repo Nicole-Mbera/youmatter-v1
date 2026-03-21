@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: ['/api/', '/admin/'],
         },
-        sitemap: 'https://www.aeon-academy.com/sitemap.xml',
+        sitemap: 'https://www.youmatter-academy.com/sitemap.xml',
     };
 }

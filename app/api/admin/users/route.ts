@@ -24,17 +24,17 @@ export async function GET(request: Request) {
         u.is_active,
         u.created_at,
         CASE 
-          WHEN u.role = 'student' THEN s.full_name
-          WHEN u.role = 'teacher' THEN t.full_name
+          WHEN u.role = 'patient' THEN p.full_name
+          WHEN u.role = 'therapist' THEN t.full_name
           WHEN u.role = 'admin' THEN a.full_name
         END as full_name,
         CASE 
-          WHEN u.role = 'student' THEN s.username
+          WHEN u.role = 'patient' THEN p.username
           ELSE NULL
         END as username
       FROM users u
-      LEFT JOIN students s ON u.id = s.user_id AND u.role = 'student'
-      LEFT JOIN teachers t ON u.id = t.user_id AND u.role = 'teacher'
+      LEFT JOIN patients p ON u.id = p.user_id AND u.role = 'patient'
+      LEFT JOIN therapists t ON u.id = t.user_id AND u.role = 'therapist'
       LEFT JOIN admins a ON u.id = a.user_id AND u.role = 'admin'
       ORDER BY u.created_at DESC`,
       args: []
@@ -44,8 +44,8 @@ export async function GET(request: Request) {
     // Get statistics
     const stats = {
       total: users.length,
-      students: users.filter((u: any) => u.role === 'student').length,
-      teachers: users.filter((u: any) => u.role === 'teacher').length,
+      patients: users.filter((u: any) => u.role === 'patient').length,
+      therapists: users.filter((u: any) => u.role === 'therapist').length,
       admins: users.filter((u: any) => u.role === 'admin').length,
       active: users.filter((u: any) => u.is_active === 1).length,
     };

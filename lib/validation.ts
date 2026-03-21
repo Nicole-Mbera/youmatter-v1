@@ -54,23 +54,22 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-export const registerStudentSchema = z.object({
+export const registerPatientSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
-  role: z.literal('student'),
+  role: z.literal('patient'),
   username: usernameSchema,
   full_name: nameSchema.optional(),
   date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)').optional(),
   gender: z.enum(['male', 'female', 'other', 'prefer_not_to_say']).optional(),
   phone: phoneSchema,
-  english_level: z.enum(['beginner', 'elementary', 'intermediate', 'upper-intermediate', 'advanced', 'proficient']).optional(),
-  learning_goals: z.string().max(1000, 'Learning goals must not exceed 1000 characters').optional(),
+  english_proficiency: z.enum(['beginner', 'intermediate', 'advanced', 'fluent']).optional(),
 });
 
-export const registerTeacherSchema = z.object({
+export const registerTherapistSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
-  role: z.literal('teacher'),
+  role: z.literal('therapist'),
   full_name: nameSchema,
   specialization: z.string()
     .min(2, 'Specialization must be at least 2 characters')
@@ -79,7 +78,6 @@ export const registerTeacherSchema = z.object({
   bio: z.string().max(1000, 'Bio must not exceed 1000 characters').optional(),
   years_of_experience: z.number().int().min(0).max(50).optional(),
   phone: phoneSchema,
-  hourly_rate: z.number().min(0).max(1000).optional(),
   license_number: z.string().optional(),
   institution_name: z.string().optional(),
   country: z.string().optional(),
@@ -89,8 +87,8 @@ export const registerTeacherSchema = z.object({
 });
 
 export const registerSchema = z.discriminatedUnion('role', [
-  registerStudentSchema,
-  registerTeacherSchema,
+  registerPatientSchema,
+  registerTherapistSchema,
 ]);
 
 export const forgotPasswordSchema = z.object({
@@ -106,17 +104,15 @@ export const resetPasswordSchema = z.object({
 // User Profile Schemas
 // ==========================================
 
-export const updateStudentProfileSchema = z.object({
+export const updatePatientProfileSchema = z.object({
   full_name: nameSchema.optional(),
   date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)').optional(),
   phone: phoneSchema,
-  address: z.string().max(500, 'Address must not exceed 500 characters').optional(),
-  emergency_contact: z.string().max(200, 'Emergency contact must not exceed 200 characters').optional(),
-  learning_goals: z.string().max(1000, 'Learning goals must not exceed 1000 characters').optional(),
-  english_level: z.enum(['beginner', 'elementary', 'intermediate', 'upper-intermediate', 'advanced', 'proficient']).optional(),
+  bio: z.string().max(1000, 'Bio must not exceed 1000 characters').optional(),
+  english_proficiency: z.enum(['beginner', 'intermediate', 'advanced', 'fluent']).optional(),
 });
 
-export const updateTeacherProfileSchema = z.object({
+export const updateTherapistProfileSchema = z.object({
   full_name: nameSchema.optional(),
   specialization: z.string()
     .min(2, 'Specialization must be at least 2 characters')
@@ -125,7 +121,7 @@ export const updateTeacherProfileSchema = z.object({
   bio: z.string().max(1000, 'Bio must not exceed 1000 characters').optional(),
   phone: phoneSchema,
   years_of_experience: z.number().int().min(0).max(50).optional(),
-  hourly_rate: z.number().min(0).max(1000).optional(),
+  consultation_fee: z.number().min(0).max(1000).optional(),
 });
 
 // ==========================================
@@ -160,7 +156,7 @@ export const updateResourceSchema = createResourceSchema.partial();
 // ==========================================
 
 export const createLessonSchema = z.object({
-  teacher_id: z.number().int().positive('Invalid teacher ID'),
+  therapist_id: z.number().int().positive('Invalid therapist ID'),
   scheduled_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
   scheduled_time: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time format (HH:MM)'),
   duration_minutes: z.number().int().min(30).max(180).default(60),
@@ -173,10 +169,9 @@ export const createLessonSchema = z.object({
 
 export const updateLessonSchema = z.object({
   status: z.enum(['scheduled', 'in-progress', 'completed', 'cancelled', 'no-show']),
-  lesson_notes: z.string().max(2000, 'Lesson notes must not exceed 2000 characters').optional(),
-  homework: z.string().max(1000, 'Homework must not exceed 1000 characters').optional(),
-  student_feedback: z.string().max(500, 'Student feedback must not exceed 500 characters').optional(),
-  teacher_feedback: z.string().max(500, 'Teacher feedback must not exceed 500 characters').optional(),
+  session_notes: z.string().max(2000, 'Session notes must not exceed 2000 characters').optional(),
+  patient_feedback: z.string().max(500, 'Patient feedback must not exceed 500 characters').optional(),
+  therapist_feedback: z.string().max(500, 'Therapist feedback must not exceed 500 characters').optional(),
   rating: z.number().int().min(1).max(5).optional(),
 });
 
@@ -184,12 +179,11 @@ export const updateLessonSchema = z.object({
 // Search/Filter Schemas
 // ==========================================
 
-export const searchTeachersSchema = z.object({
+export const searchTherapistsSchema = z.object({
   specialization: z.string().max(100).optional(),
   name: z.string().max(100).optional(),
   min_rating: z.number().min(0).max(5).optional(),
-  max_rate: z.number().min(0).optional(),
-  english_level: z.enum(['beginner', 'elementary', 'intermediate', 'upper-intermediate', 'advanced', 'proficient']).optional(),
+  max_fee: z.number().min(0).optional(),
   page: z.number().int().min(1).default(1),
   limit: z.number().int().min(1).max(100).default(10),
 });

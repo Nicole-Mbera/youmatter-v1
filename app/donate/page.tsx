@@ -34,7 +34,7 @@ export default function DonatePage() {
             </p>
 
             <p>
-              Secondary schools remain closed. Universities ban women. Female teachers have lost their livelihoods.
+              Secondary schools remain closed. Universities ban women. Female therapists have lost their livelihoods.
             </p>
 
             <p className="font-medium text-black">
@@ -46,7 +46,7 @@ export default function DonatePage() {
         <div className="rounded-lg bg-gray-50 border border-gray-200 p-3 text-sm">
           <h4 className="font-semibold text-black mb-1">Our Response</h4>
           <p className="text-gray-700">
-            We provide digital learning platforms, educational resources, and support for Afghan women teachers.
+            We provide digital learning platforms, educational resources, and support for Afghan women therapists.
           </p>
         </div>
 

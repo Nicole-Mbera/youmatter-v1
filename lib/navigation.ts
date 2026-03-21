@@ -7,7 +7,7 @@ export interface NavItem {
   match?: "exact" | "startswith";
 }
 
-export const adminNav = [
+export const adminNav: NavItem[] = [
   {
     label: "Dashboard",
     href: "/admin",
@@ -19,8 +19,8 @@ export const adminNav = [
     icon: "team",
   },
   {
-    label: "Teacher Approvals",
-    href: "/admin/teachers",
+    label: "Therapist Approvals",
+    href: "/admin/therapist",
     icon: "doctor",
   },
   {
@@ -30,63 +30,54 @@ export const adminNav = [
   },
 ];
 
-export const teacherNav = [
+export const therapistNav: NavItem[] = [
   {
     label: "Dashboard",
-    href: "/teacher",
+    href: "/clinician",
     icon: "dashboard",
   },
   {
-    label: "My Profile",
-    href: "/teacher/profile",
-    icon: "user",
-  },
-  {
-    label: "My Students",
-    href: "/teacher/students",
-    icon: "doctor",
+    label: "My Sessions",
+    href: "/clinician/sessions",
+    icon: "clock",
   },
   {
     label: "Schedule",
-    href: "/teacher/schedule",
+    href: "/clinician/schedule",
     icon: "schedule",
   },
-];
-
-// Organization routes kept for backward compatibility but merged with admin
-export const institutionNav = [
   {
-    label: "Dashboard",
-    href: "/admin",
-    icon: "dashboard",
+    label: "Messages",
+    href: "/clinician/messages",
+    icon: "chat",
   },
   {
-    label: "Teachers",
-    href: "/admin/users",
-    icon: "doctor",
-  },
-  {
-    label: "Documents",
-    href: "/admin/blogs",
-    icon: "docs",
+    label: "My Profile",
+    href: "/clinician/profile",
+    icon: "user",
   },
 ];
 
-export const studentNav = [
+export const patientNav: NavItem[] = [
   {
     label: "Dashboard",
-    href: "/student",
+    href: "/patient",
     icon: "dashboard",
   },
   {
-    label: "Find Teachers",
-    href: "/student/teachers",
+    label: "Find Therapist",
+    href: "/patient/find-therapist",
     icon: "doctor",
   },
   {
-    label: "Resource Hub",
-    href: "/resourceHub",
-    icon: "docs",
+    label: "My Sessions",
+    href: "/patient/sessions",
+    icon: "clock",
+  },
+  {
+    label: "Messages",
+    href: "/patient/messages",
+    icon: "chat",
   },
   {
     label: "Share Testimonial",

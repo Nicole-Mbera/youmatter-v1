@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ReactNode } from "react";
 
 interface AuthShellProps {
@@ -26,14 +25,9 @@ export function AuthShell({
       <div className="relative z-10 w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-12">
-          <Link href="/" className="inline-flex items-center gap-2 mb-8 hover:opacity-80 transition">
-            <div className="relative h-12 w-12 overflow-hidden rounded-full">
-              <Image
-                src="/uploads/logo.jpeg"
-                alt="You Matter Logo"
-                fill
-                className="object-cover"
-              />
+          <Link href="/" className="inline-flex items-center gap-3 mb-8 hover:opacity-80 transition">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm">UM</span>
             </div>
             <span className="text-2xl font-bold text-gray-900">You Matter</span>
           </Link>

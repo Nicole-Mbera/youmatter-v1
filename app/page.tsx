@@ -102,7 +102,7 @@ function StepCard({ number, title, description }: { number: number; title: strin
   );
 }
 
-function TherapistCard({ therapist }: { therapist: (typeof therapists)[0] }) {
+function TherapistCard({ therapist, onAuthRequired }: { therapist: (typeof therapists)[0]; onAuthRequired: () => void }) {
   return (
     <div className="rounded-2xl bg-white border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300">
       <div className="relative h-48 bg-gradient-to-br from-green-100 to-blue-50 overflow-hidden">
@@ -125,11 +125,12 @@ function TherapistCard({ therapist }: { therapist: (typeof therapists)[0] }) {
           <div className="text-lg font-bold text-green-700">${therapist.price}</div>
         </div>
 
-        <Link href={`/patient/clinician/${therapist.id}`}>
-          <Button className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold h-10">
-            View Profile
-          </Button>
-        </Link>
+        <Button
+          onClick={onAuthRequired}
+          className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold h-10"
+        >
+          Book a Session
+        </Button>
       </div>
     </div>
   );
@@ -158,15 +159,15 @@ function FAQItem({ item, isOpen, onToggle }: { item: (typeof faqs)[0]; isOpen: b
     <div className="border-b border-gray-200 last:border-b-0">
       <button
         onClick={onToggle}
-        className="w-full py-6 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
+        className="w-full px-6 py-6 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
       >
         <span className="font-semibold text-gray-900">{item.question}</span>
         <ChevronDown
-          className={`w-5 h-5 text-green-600 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-green-600 flex-shrink-0 ml-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
       {isOpen && (
-        <div className="pb-6 pr-6 text-gray-700 text-sm leading-relaxed">
+        <div className="px-6 pb-6 text-gray-700 text-sm leading-relaxed">
           {item.answer}
         </div>
       )}
@@ -191,7 +192,7 @@ export default function LandingPage() {
             <span className="font-bold text-lg text-gray-900">You Matter</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link href="/patient/find-therapist">
               <Button variant="secondary" className="rounded-lg text-sm">
                 Find Therapist
@@ -199,10 +200,19 @@ export default function LandingPage() {
             </Link>
             <button
               onClick={() => {
-                setPreSelectedRole('therapist');
+                setPreSelectedRole('patient');
                 setAuthModalOpen(true);
               }}
               className="bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm px-5 py-2 font-semibold transition-colors"
+            >
+              Get Started
+            </button>
+            <button
+              onClick={() => {
+                setPreSelectedRole('therapist');
+                setAuthModalOpen(true);
+              }}
+              className="border border-green-600 text-green-700 hover:bg-green-50 rounded-lg text-sm px-5 py-2 font-semibold transition-colors"
             >
               I'm a Professional
             </button>
@@ -300,7 +310,14 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {therapists.map((therapist) => (
-              <TherapistCard key={therapist.id} therapist={therapist} />
+              <TherapistCard
+                key={therapist.id}
+                therapist={therapist}
+                onAuthRequired={() => {
+                  setPreSelectedRole('patient');
+                  setAuthModalOpen(true);
+                }}
+              />
             ))}
           </div>
 
