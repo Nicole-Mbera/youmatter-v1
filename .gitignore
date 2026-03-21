@@ -7,3 +7,18 @@ node_modules/
 .env.production.local
 CLAUDE_HANDOFF.md
 .claude
+
+# Local DB
+youmatter.db
+
+# Build cache
+tsconfig.tsbuildinfo
+
+# macOS
+.DS_Store
+
+# Test uploads (personal documents from dev)
+public/uploads/
+
+# Dev scratch files
+status.txt
