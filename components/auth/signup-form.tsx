@@ -630,7 +630,7 @@ export function SignupForm({ preSelectedRole }: SignupFormProps = {}) {
                 disabled={isLoading}
                 rows={3}
                 className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 focus:border-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                placeholder="Tell us about experience ..."
+                placeholder="Tell us about your experience ..."
               />
             </div>
 

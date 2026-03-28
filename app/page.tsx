@@ -266,10 +266,12 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="relative h-96 bg-gradient-to-br from-green-200 to-green-300 rounded-3xl shadow-lg overflow-hidden flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-100/20 to-green-200/20 backdrop-blur-sm" />
-              <div className="text-center text-gray-600 font-medium">Diverse African Individuals in Calm Setting</div>
-            </div>
+          <div className="relative h-96 bg-gradient-to-br from-green-200 to-green-300 rounded-3xl shadow-lg overflow-hidden flex items-center justify-center">
+    <div className="absolute inset-0 bg-gradient-to-br from-green-100/20 to-green-200/20 backdrop-blur-sm">
+        <img src="https://images.pond5.com/black-family-embrace-group-south-footage-217783381_iconl.jpeg" alt="Therapy Session" className="w-full h-full object-cover rounded-3xl"/>
+    </div>
+</div>
+
           </div>
         </div>
       </section>
