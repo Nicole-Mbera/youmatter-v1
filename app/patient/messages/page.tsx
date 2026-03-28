@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -39,7 +39,7 @@ function formatMessageTime(isoString: string) {
   return new Date(isoString).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }
 
-export default function PatientMessagesPage() {
+function PatientMessagesPage() {
   const { user, token, isLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -325,5 +325,17 @@ export default function PatientMessagesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function PatientMessagesPageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-solid border-black border-r-transparent" />
+      </div>
+    }>
+      <PatientMessagesPage />
+    </Suspense>
   );
 }
