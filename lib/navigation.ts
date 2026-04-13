@@ -47,6 +47,17 @@ export const therapistNav: NavItem[] = [
     icon: "schedule",
   },
   {
+    label: "My Patients",
+    href: "/clinician/patients",
+    icon: "team",
+    match: "startswith",
+  },
+  {
+    label: "Analytics",
+    href: "/clinician/analytics",
+    icon: "chart",
+  },
+  {
     label: "Messages",
     href: "/clinician/messages",
     icon: "chat",

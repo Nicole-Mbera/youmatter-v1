@@ -94,6 +94,8 @@ export default function ClinicianDashboardPage() {
   const navItems = [
     { icon: Home, label: 'Dashboard', href: '/clinician' },
     { icon: Clock, label: 'My Sessions', href: '/clinician/sessions' },
+    { icon: Users, label: 'My Patients', href: '/clinician/patients' },
+    { icon: BarChart2, label: 'Analytics', href: '/clinician/analytics' },
     { icon: MessageSquare, label: 'Messages', href: '/clinician/messages' },
     { icon: Calendar, label: 'Schedule', href: '/clinician/schedule' },
   ];
@@ -282,6 +284,8 @@ export default function ClinicianDashboardPage() {
             {[
               { label: 'Update Schedule', href: '/clinician/schedule', icon: Calendar },
               { label: 'View Messages', href: '/clinician/messages', icon: MessageSquare },
+              { label: 'My Patients', href: '/clinician/patients', icon: Users },
+              { label: 'Program Analytics', href: '/clinician/analytics', icon: BarChart2 },
               { label: 'All Sessions', href: '/clinician/sessions', icon: Clock },
               { label: 'Edit Profile', href: '/clinician/profile', icon: User },
             ].map((action) => {
